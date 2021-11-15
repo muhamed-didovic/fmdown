@@ -1,0 +1,49 @@
+{
+	"name": "fmdown",
+	"version": "0.0.1",
+	"description": "Download courses",
+	"main": "index.js",
+	"scripts": {},
+	"bin": {
+		"fmdown": "./index.js"
+	},
+	"keywords": [
+		"download",
+		"nodejs",
+		"js"
+	],
+	"author": "Muhamed Didovic (github.com/muhamed-didovic)",
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/alekseylovchikov/fmdown.git"
+	},
+	"dependencies": {
+		"app-module-path": "^2.2.0",
+		"async-http-request": "^1.0.4",
+		"async-request": "^1.2.0",
+		"auto-bind": "^4.0.0",
+		"axios": "^0.21.1",
+		"bluebird": "^3.7.2",
+		"cheerio": "latest",
+		"colors": "^1.1.2",
+		"download": "^6.2.5",
+		"express": "latest",
+		"fs-extra": "^10.0.0",
+		"github-version-checker": "^1.2.0",
+		"he": "^1.2.0",
+		"jar-got": "^0.1.0",
+		"jest-worker": "^27.3.1",
+		"lodash.range": "^3.2.0",
+		"ora": "^5.4.1",
+		"p-state-defer": "^1.0.1",
+		"prompts": "^2.4.2",
+		"remote-file-size": "^3.0.5",
+		"request": "latest",
+		"request-progress": "^3.0.0",
+		"sanitize-filename": "^1.6.3",
+		"scraping-ninja-toolkit": "^1.0.0-beta.2",
+		"tough-cookie": "^2.5.0",
+		"ytdl-run": "^0.2.1"
+	}
+}
