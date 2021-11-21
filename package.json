@@ -1,7 +1,7 @@
 {
 	"name": "fmdown",
 	"version": "0.0.1",
-	"description": "Download courses",
+	"description": "Download courses from https://coursehunter.net/",
 	"main": "index.js",
 	"scripts": {},
 	"bin": {
@@ -32,9 +32,11 @@
 		"fs-extra": "^10.0.0",
 		"github-version-checker": "^1.2.0",
 		"he": "^1.2.0",
+		"is-valid-path": "^0.1.1",
 		"jar-got": "^0.1.0",
 		"jest-worker": "^27.3.1",
 		"lodash.range": "^3.2.0",
+		"meow": "^9.0.0",
 		"ora": "^5.4.1",
 		"p-state-defer": "^1.0.1",
 		"prompts": "^2.4.2",
