@@ -388,7 +388,6 @@ async function prompt() {
   return { input, email, password, downDir, type };
 }
 
-// const COURSE_ID_RE = /\/?([a-z\\-]+)\/?$/;
 (async () => {
 
   const { input, email, password, downDir, type } = await prompt();
