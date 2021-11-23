@@ -156,7 +156,7 @@ const cli = meow(`
     Examples
       $ coursehunters
       $ coursehunters test.json
-      $ coursehunters -a -f webm -r high
+      $ coursehunters -e user@gmail.com -p password -d path-to-directory -t cource
 `, {
   flags: {
     email    : {
