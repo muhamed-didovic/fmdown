@@ -2,6 +2,8 @@
 
 const path = require('path');
 const fs = require('fs');
+const ora = require("ora");
+
 
 const makeDownloadFolderPath = downloadFolder => {
   const sep = path.sep;
@@ -13,6 +15,7 @@ const makeDownloadFolderPath = downloadFolder => {
 };
 
 const createFolder = downloadFolder => {
+  // const msg = ora('Checking folder..').start()
   const sep = path.sep;
   const initDir = path.isAbsolute(downloadFolder) ? sep : '';
   downloadFolder
@@ -21,16 +24,21 @@ const createFolder = downloadFolder => {
       const curDir = path.resolve(parentDir, childDir);
       try {
         fs.mkdirSync(curDir);
+        // msg.succeed(`Directory ${curDir} created`);
+        return curDir;
       } catch (err) {
         if (err.code !== 'EEXIST' && err.code !== 'EISDIR') {
+          console.log('--ERRRR', err);
           throw err;
         }
-        if (curDir == makeDownloadFolderPath(downloadFolder))
-          console.log(`Directory ${curDir} already exists`.blue);
+        /*if (curDir == makeDownloadFolderPath(downloadFolder)){
+          msg.fail(`Directory ${curDir} already exists`);
+        }*/
+
+        // msg.succeed(`Directory ${curDir} created`);
         return curDir;
       }
-      console.log(`Directory ${curDir} created`.blue);
-      return curDir;
+
     }, initDir);
 };
 

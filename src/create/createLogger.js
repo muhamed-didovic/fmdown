@@ -2,12 +2,15 @@
 
 const path = require('path');
 const fs = require('fs');
+const ora = require("ora");
+
 
 const createLogger = async downloadFolder => {
+  const msg = ora('Checking logger..').start()
   const logFile =`${downloadFolder}${path.sep}videos.txt`
   fs.existsSync(logFile) ?
-    console.log(`File ${logFile} already exists`.blue) :
-    console.log(`File ${logFile} created`.blue);
+    msg.fail(`File ${logFile} already exists`) :
+    msg.succeed()`File ${logFile} created)`;
   const logger = fs.createWriteStream(logFile, { flags: 'a' });
   return logger;
 };

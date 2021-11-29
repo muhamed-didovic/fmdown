@@ -28,14 +28,15 @@ const createLogger = require('src/create/createLogger');
 const downloadVideos = require('src/download/downloadVideos');
 const downloadAllMaterials = require('src/download/downloadMaterials');
 const getVideos = require('src/download/getVideos.js');
-const getToken = require('./src/download/getToken');
+const getToken = require('src/download/getToken');
 // const courses = require("./frontendmasters20211109T222322916Z.json");
-const coursehunters = require('./coursehunters.js')
+const coursehunters = require('./coursehunters')
+const logger = ora()
 
-const getLessonNumbers = lessonsString => {
+/*const getLessonNumbers = lessonsString => {
   let lessonNumbers = [];
-  const regExpComma = /\s*,\s*/,
-        regExpDash  = /\s*-\s*/,
+  const regExpComma = /\s*,\s*!/,
+        regExpDash  = /\s*-\s*!/,
         lessonList  = lessonsString.split(regExpComma);
   for (let item of lessonList) {
     const dashCounter = (item.match(/-/g) || []).length;
@@ -64,20 +65,18 @@ const getLessonNumbers = lessonsString => {
       return self.indexOf(value) === index;
     });
   return lessonNumbers;
-};
+};*/
 const getLastSegment = url => {
   let parts = url.split('/');
   return parts.pop() || parts.pop(); // handle potential trailing slash
 };
 const runGetVideos = async (url, token) => {
   const courseUrl = url;
-
   let downloadFolder = 'videos/' + getLastSegment(courseUrl);
   // console.log('downloadFolder', downloadFolder);//'---', path.resolve(process.cwd(), 'videos/')
   await createFolder(downloadFolder);
 
-  const logger = await createLogger(downloadFolder);
-
+  // const logger = await createLogger(downloadFolder);
   const videos = [];
 
   return await getVideos(courseUrl, token)
@@ -90,7 +89,7 @@ const runGetVideos = async (url, token) => {
       /*if (data.urlMaterials.length > 0) {
         downloadAllMaterials(data.urlMaterials, downloadFolder);
       }*/
-      // console.log('Start download videos, please wait...');
+      // console.log('Start download videos, please wait...', data);
       //downloadVideos(logger, videos, downloadFolder, lessonNumbers);
 
       return data;
@@ -99,18 +98,38 @@ const runGetVideos = async (url, token) => {
 };
 
 const runGetCourses = async (token, downDir, type, url) => {
-  console.log('TOKEN', token);
+  // console.log('TOKEN', token);
   let categories;
+  let pagesMsg = ora('start gathering data..').start()
 
   //if url is provided
   if (type === 'course') {
-    const courseUrl = url;
-    console.log('courseUrl', courseUrl);
-    return await runGetVideos(courseUrl, token);
+    //pagesMsg.text = 'Scraping for course'
+    pagesMsg.succeed('Scraping for course')
+    console.log('courseUrl', url);
+    let data = await runGetVideos(url, token);
+    let course = {};
+    if (data?.urlMaterials && data?.urlMaterials.length > 0) {
+      course.materials = data.urlMaterials
+    }
+    if (data?.result && data?.result.length > 0) {
+      // const course = allCourses.find(c => c.url === p.location);
+      course.chapters = data.result;
+      course.names = data.names;
+    }
+    course.url = url
+
+    return [
+      {
+        category: 'Single course',
+        courses : [course]
+      }
+    ]
   }
 
   //if source is provided
   if (type === 'source') {
+    pagesMsg.text = 'Scraping for source'
     categories = [
       url
     ];
@@ -123,7 +142,7 @@ const runGetCourses = async (token, downDir, type, url) => {
     // console.log('ALL CATEGORIES', categories);
     // return;
   }
-  console.log('categories', categories);
+  // console.log('categories', categories);
 
   // CATEGORIES [
   //   'https://coursehunter.net/frontend',
@@ -165,7 +184,7 @@ const runGetCourses = async (token, downDir, type, url) => {
         const allCourses = await fetchNode
           .paginate('.pagination__a[rel="next"]')
           .flatMap(p => {
-              console.log('category:', p.location);
+              pagesMsg.text = `page: ${p.location}`
               // return;
               //location = p.location;
               return p.scrapeAll('article', {
@@ -177,6 +196,7 @@ const runGetCourses = async (token, downDir, type, url) => {
               });
             }
           );
+        pagesMsg.succeed(`completed pages gathering`)
         // console.log('---allCourses', allCourses);
         // const allCourses = [
         //   {
@@ -185,11 +205,12 @@ const runGetCourses = async (token, downDir, type, url) => {
         //     url: 'https://coursehunter.net/course/c-essential'
         //   }
         // ];
-        // console.log('allCourses', allCourses);
+
         // return;
         // For each course scrape chapters
         // with a concurrency of 50 queries at the same time
         // and filter "undefined" values (courses without chapters)
+        const scrapingMsg = ora('start gathering courses..').start()
         const courses = await createFetcher()
           .getAll(allCourses.map(c => c.url), {
             headers: {
@@ -198,7 +219,7 @@ const runGetCourses = async (token, downDir, type, url) => {
           })
           .map(
             async p => {
-              console.log(`Course url: ${p.location}`);
+              scrapingMsg.text = `Scraping url: ${p.location}`
 
               let data = await runGetVideos(p.location, token);
               // console.log('-->data', data);
@@ -217,7 +238,7 @@ const runGetCourses = async (token, downDir, type, url) => {
             { concurrency: 50 }//50
           )
           .filter(c => c);
-
+        scrapingMsg.succeed(`Scraping done`)
 
         // console.log('courses', courses);
         // console.log('FINAL', categories[index].split('/').pop(), courses);
@@ -227,7 +248,7 @@ const runGetCourses = async (token, downDir, type, url) => {
         }
         //`${downloadFolder}${path.sep}${videoName}.mp4`
         let fileName = categories[index].split('/').pop() + new Date().toISOString().slice(0, 10)
-        console.log('Data gathered to a file:', `${downDir}${path.sep}${fileName}.json`);
+        logger.succeed(`Data gathered to a file: ${downDir}${path.sep}${fileName}.json`);
         fs.writeFileSync(`${downDir}${path.sep}${fileName}.json`, JSON.stringify(r, null, 2), 'utf8');
         return r;
       },
@@ -252,23 +273,9 @@ const startDownloading = async ({ email, password, downDir, type, url }) => {
   }
 };
 
-// console.log('ARGS', process.argv);
-// const url = 'url';
-// const dirName = 'dirName';
-/*let flags = {
-  source : ['--source', '-s'],
-  url    : ['--url', '-u'],
-  dirName: ['--dir', '-d'],
-  lessons: ['--lessons', '-l']
-};
-const indexUrlFlag = getFlagIndex(flags.url);
-const indexDirFlag = getFlagIndex(flags.dirName);
-const indexSourceFlag = getFlagIndex(flags.source);
-const indexLessonsFlag = getFlagIndex(flags.lessons);*/
-
 const cli = meow(`
     Usage
-      $ coursehunters <?courseUrl>
+      $ ch <?courseUrl>
 
     Options
       --email, -e 
@@ -277,43 +284,30 @@ const cli = meow(`
       --type, -t  source|course
       
     Examples
-      $ coursehunters
-      $ coursehunters https://coursehunter.net/course/intermediate-typescript/
-      $ coursehunters -a -f webm -r high
-`, {
-  flags: {
-    /*all: {
-      type: 'boolean',
-      alias: 'a'
-    },
-    format: {
-      type: 'string',
-      alias: 'f'
-    },
-    resolution: {
-      type: 'string',
-      alias: 'r'
-    },*/
+      $ ch
+      $ ch https://coursehunter.net/course/intermediate-typescript/
+      $ ch -e user@gmail.com -p password -d path-to-directory -t source`,
+  {
+    flags: {
+      email    : {
+        type : 'string',
+        alias: 'e'
+      },
+      password : {
+        type : 'string',
+        alias: 'p'
+      },
+      directory: {
+        type : 'string',
+        alias: 'd'
+      },
+      type     : {
+        type : 'string',
+        alias: 't'
+      },
 
-    email    : {
-      type : 'string',
-      alias: 'e'
-    },
-    password : {
-      type : 'string',
-      alias: 'p'
-    },
-    directory: {
-      type : 'string',
-      alias: 'd'
-    },
-    type     : {
-      type : 'string',
-      alias: 't'
-    },
-
-  }
-})
+    }
+  })
 
 /**
  * @param {Omit<import('prompts').PromptObject, 'name'>} question
@@ -323,8 +317,6 @@ async function askOrExit(question) {
   return res.value
 }
 
-// const logger = ora()
-// const ask = async config => await prompts(config, { onCancel: () => logger.fail('plz answer..') && process.exit() });
 async function prompt() {
   const {
           flags,
@@ -383,22 +375,37 @@ async function prompt() {
       initial: 0
     })
 
-  console.log('flags', flags);
-  console.log('input', input);
+  // console.log('flags', flags);
+  // console.log('input', input);
   return { input, email, password, downDir, type };
 }
+
+/**
+ * @description
+ * get file name from path
+ * @param {string} path path to get file name
+ * @returns {string} file name
+ * @example
+ * getFileName('getFileName/index.js') // => index.js
+ */
+const getFileName = path => path.replace(/^.*[\\\/]/, '');
 
 (async () => {
 
   const { input, email, password, downDir, type } = await prompt();
 
-  console.log('etc', { email, password, downDir, type, url: input[0] });
+  // console.log('etc', { email, password, downDir, type, url: input[0] });
   let r = await startDownloading({ email, password, downDir, type, url: input[0] });
-  if (r.length > 0) {
-    console.log('111RESULT:', r);
-    const json = r[0];
-    await coursehunters.run({json, email, password, downDir})
-  }
+  //if (r.length > 0) {
+  console.log('111RESULT:', r);
+  let json = {};// = type === 'course' ? json.courses = [r] : r[0];
+  // if (type === 'course') {
+  //   json['courses'] = [r]
+  // } else {
+  json = r[0]
+  //}
+  await coursehunters.run({ json, email, password, downDir, fileName: getFileName(input[0]) })
+  //}
 
 })()
 

@@ -2,65 +2,32 @@
 require('app-module-path').addPath(__dirname);
 const Promise = require('bluebird');
 const path = require("path");
-const createFolder = require("src/create/createFolder");
-const createLogger = require("src/create/createLogger");
-const getVideos = require("src/download/getVideos.js");
 const he = require("he");
-const downloadAllMaterials = require("src/download/downloadMaterials");
-const downloadVideos = require("src/download/downloadVideos");
-const colors = require('colors');
-const request = require("request");
+// const colors = require('colors');
+// const request = require("request");
 const fs = require("fs-extra");
-const progress = require("request-progress");
-const { writeWaitingInfo } = require("src/download/writeWaitingInfo");
-const cleanLine = require("src/download/cleanLine");
-const getToken = require("./src/download/getToken");
-
-// const c = require('./frontendmasters.json')
+// const progress = require("request-progress");
 const ora = require("ora");
 const prompts = require("prompts");
 const isValidPath = require("is-valid-path");
 const meow = require("meow");
 
+
+const createFolder = require("src/create/createFolder");
+const getVideos = require("src/download/getVideos.js");
+// const downloadAllMaterials = require("src/download/downloadMaterials");
+const downloadVideos = require("src/download/downloadVideos");
+// const { writeWaitingInfo } = require("src/download/writeWaitingInfo");
+// const cleanLine = require("src/download/cleanLine");
+const getToken = require("src/download/getToken");
+
 const getLastSegment = url => {
   let parts = url.split('/');
   return parts.pop() || parts.pop(); // handle potential trailing slash
 };
-const getLessonNumbers = lessonsString => {
-  let lessonNumbers = [];
-  const regExpComma = /\s*,\s*/,
-        regExpDash  = /\s*-\s*/,
-        lessonList  = lessonsString.split(regExpComma);
-  for (let item of lessonList) {
-    const dashCounter = (item.match(/-/g) || []).length;
-    if (dashCounter === 1) {
-      const periodList = item.split(regExpDash);
-      let firstNumber = Number(periodList[0]),
-          lastNumber  = Number(periodList[1]),
-          buf         = 0;
-      if (firstNumber > lastNumber) {
-        buf = firstNumber;
-        firstNumber = lastNumber;
-        lastNumber = buf;
-      }
-      for (let i = firstNumber; i <= lastNumber; i++) {
-        lessonNumbers.push(i);
-      }
-    } else if (dashCounter === 0) {
-      lessonNumbers.push(Number(item));
-    }
-  }
-  lessonNumbers = lessonNumbers
-    .sort(function (a, b) {
-      return a - b;
-    })
-    .filter(function (value, index, self) {
-      return self.indexOf(value) === index;
-    });
-  return lessonNumbers;
-};
-const getVideosFromFile = async (json, course, index, token, downDir) => {
 
+const getVideosFromFile = async (json, course, index, token, downDir, fileName) => {
+  // console.log('json---', json, 'index', index, 'downDir', downDir, 'fileName', fileName);
   if (course?.done === true) {
     return;
   }
@@ -70,10 +37,10 @@ const getVideosFromFile = async (json, course, index, token, downDir) => {
   console.log('downloadFolder', downloadFolder);
   createFolder(downloadFolder);
 
-  const logger = await createLogger(downloadFolder);
+  // const logger = await createLogger(downloadFolder);
 
   const lessonNumbers = null;//getLessonNumbers(0);
-  console.log('lessonNumbers', lessonNumbers);
+
   /*const videos = course.chapters.map((url, i) => {
     const name = he.decode(course.names[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
     //console.log('name', name);
@@ -104,11 +71,11 @@ const getVideosFromFile = async (json, course, index, token, downDir) => {
     })
     .then(async data => {
 
-      console.log('Start download videos, please wait...');
+      //console.log('Start download videos, please wait...');
       await downloadVideos(logger, videos, downloadFolder, lessonNumbers);
       console.log('COURSE INDEX:', index, json.courses[index].url);
       json.courses[index].done = true;
-      fs.writeFileSync('frontendmasters.json', JSON.stringify(json, null, 2), 'utf8');
+      fs.writeFileSync(fileName, JSON.stringify(json, null, 2), 'utf8');
       return data;
     })
     .then(async data => {
@@ -119,23 +86,54 @@ const getVideosFromFile = async (json, course, index, token, downDir) => {
 
       return data;
     })
+  //.catch(err => console.log(`${err}`.red, 'DA VIDIMO', err))*/
 };
 
+/*const runGetVideos = async (url) => {
+  const courseUrl = url || process.argv[indexUrlFlag + 1];
+  let downloadFolder = 'videos/' + ((indexDirFlag === -1) ? getLastSegment(courseUrl) : process.argv[indexDirFlag + 1]);
+  console.log('downloadFolder', downloadFolder, '---', path.resolve(process.cwd(), 'videos/'));
+  createFolder(downloadFolder);
+
+  const logger = createLogger(downloadFolder);
+
+  const lessonNumbers = (indexLessonsFlag === -1) ? null : getLessonNumbers(process.argv[indexLessonsFlag + 1]);
+  const videos = [];
+
+  return await getVideos(courseUrl, token)
+    .then(data => {
+      //console.log('1DATA', data);
+      data.result.map((url, i) => {
+        const name = he.decode(data.names[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
+        //console.log('name', name);
+        data.names[i] = name;
+        videos.push({ url, name });
+      });
+      if (data.urlMaterials.length > 0) {
+        downloadAllMaterials(data.urlMaterials, downloadFolder);
+      }
+      console.log('Start download videos, please wait...');
+      downloadVideos(logger, videos, downloadFolder, lessonNumbers);
+
+      return data;
+    })
+    .catch(err => console.log(`${err}`.red, 'DA VIDIMO', err))
+};*/
+
 const logger = ora()
-const ask = async config => await prompts(config, { onCancel: () => logger.fail('plz answer..') && process.exit() });
-const run = async ({json, email, password, downDir}) => {
+const run = async ({json, email, password, downDir, fileName}) => {
   Promise
     .resolve()
     .then(() => {
       return getToken(email, password);
     })
     .then(token => {
-      console.log('TOKEN', token);
-      return Promise.each(json.courses, (course, index) => getVideosFromFile(json, course, index, token, downDir))
+      return Promise.each(json.courses, (course, index) => getVideosFromFile(json, course, index, token, downDir, fileName))
     })
     .then(result => {
+      // This will run after the last step is done
       console.log("Done!")
-      console.log(result);
+      // console.log(result);
     })
     .catch(rejection => {
       console.error("Catch: ", rejection);
@@ -145,7 +143,7 @@ const run = async ({json, email, password, downDir}) => {
 
 const cli = meow(`
     Usage
-      $ coursehunters <?courseUrl>
+      $ ch <?courseUrl>
 
     Options
       --email, -e 
@@ -154,9 +152,9 @@ const cli = meow(`
       --type, -t  source|course
       
     Examples
-      $ coursehunters
-      $ coursehunters test.json
-      $ coursehunters -e user@gmail.com -p password -d path-to-directory -t cource
+      $ ch
+      $ ch test.json
+      $ ch -a -f webm -r high
 `, {
   flags: {
     email    : {
@@ -170,7 +168,12 @@ const cli = meow(`
     directory: {
       type : 'string',
       alias: 'd'
-    }
+    },
+    /*type     : {
+      type : 'string',
+      alias: 't'
+    },*/
+
   }
 })
 
@@ -191,6 +194,7 @@ async function prompt() {
   if (input.length === 0) {
     input.push(await askOrExit({
       type: 'text',
+      // name    : 'file',
       message: `Enter a reference file to scrape from (eg: ${path.resolve(process.cwd())}): `,
       // initial: path.resolve(process.cwd()),
       initial: './frontendmasters.json'
@@ -201,14 +205,12 @@ async function prompt() {
   const email = flags.email || await askOrExit({
     type: 'text',
     message : 'Enter email',
-    initial : 'abhagsain@gmail.com',
     validate: value => value.length < 5 ? `Sorry, enter correct email` : true
   })
 
   const password = flags.password || await askOrExit({
     type: 'text',
     message : 'Enter password',
-    initial : '$munniB@dna@m1$',
     validate: value => value.length < 5 ? `Sorry, password must be longer` : true
   })
 
@@ -220,19 +222,27 @@ async function prompt() {
     validate: isValidPath
   }))
 
-  console.log('flags', flags);
-  console.log('input', input);
-
-  console.log('etc', { file: input[0], email, password, downDir });
   return { input, email, password, downDir };
 }
+
+/**
+ * @description
+ * get file name from path
+ * @param {string} path path to get file name
+ * @returns {string} file name
+ * @example
+ * getFileName('getFileName/index.js') // => index.js
+ */
+const getFileName = path => path.replace(/^.*[\\\/]/, '');
 
 const coursehunters = async () => {
 
   const { input, email, password, downDir } = await prompt();
+  // console.log('file:', require(options.file));
   const json = require(input[0]);
   if (json?.courses.length > 0) {
-    await run({ json, email, password, downDir });
+    //file, email, password, downDir
+    await run({ json, email, password, downDir, fileName: getFileName(input[0]) });
   }
 }
 
