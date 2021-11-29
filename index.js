@@ -275,17 +275,17 @@ const startDownloading = async ({ email, password, downDir, type, url }) => {
 
 const cli = meow(`
     Usage
-      $ ch <?courseUrl>
+    $ chdown <?CourseUrl|SourceUrl>
 
-    Options
-      --email, -e 
-      --password, -p
-      --directory, -d
-      --type, -t  source|course
+Options
+      --email, -e   Your email. 
+      --password, -p    Your password.
+      --directory, -d   Directory to save.
+      --type, -t  source|course Type of download. 
       
     Examples
       $ ch
-      $ ch https://coursehunter.net/course/intermediate-typescript/
+      $ ch https://coursehunter.net/course/intermediate-typescript/ -t course 
       $ ch -e user@gmail.com -p password -d path-to-directory -t source`,
   {
     flags: {
