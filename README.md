@@ -1,5 +1,5 @@
 # Download videos (course) from coursehunter.net
-[![npm](https://badgen.net/npm/v/thebook-pdfy)](https://www.npmjs.com/package/thebook-pdfy)
+[![npm](https://badgen.net/npm/v/chdown)](https://www.npmjs.com/package/chdown)
 
 ## Install
 ```sh
