@@ -198,7 +198,7 @@ const runGetCourses = async (token, downDir, type, url) => {
           })
           .map(
             async p => {
-              console.log(`Scraping url: ${p.location}`);
+              console.log(`Course url: ${p.location}`);
 
               let data = await runGetVideos(p.location, token);
               // console.log('-->data', data);

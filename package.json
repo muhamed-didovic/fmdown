@@ -1,11 +1,11 @@
 {
-	"name": "fmdown",
+	"name": "chdown",
 	"version": "0.0.1",
 	"description": "Download courses from https://coursehunter.net/",
 	"main": "index.js",
 	"scripts": {},
 	"bin": {
-		"fmdown": "./index.js"
+		"chdown": "./index.js"
 	},
 	"keywords": [
 		"download",
@@ -13,10 +13,10 @@
 		"js"
 	],
 	"author": "Muhamed Didovic (github.com/muhamed-didovic)",
-	"license": "ISC",
+	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/alekseylovchikov/fmdown.git"
+		"url": "git://github.com/muhamed-didovic/fmdown.git"
 	},
 	"dependencies": {
 		"app-module-path": "^2.2.0",
