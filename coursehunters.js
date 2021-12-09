@@ -59,7 +59,7 @@ const getVideosFromFile = async (json, course, index, token, downDir, fileName) 
   const videos = [];
   return await getVideos(courseUrl, token)
     .then(async data => {
-      console.log('1DATA', data);
+      // console.log('1DATA', data);
       data.result.map((url, i) => {
         const name = he.decode(data.names[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
         //console.log('name', name);
