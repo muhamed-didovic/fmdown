@@ -19,15 +19,17 @@ Usage
     $ chdown <?CourseUrl|SourceUrl>
 
 Options
-      --email, -e   Your email.
-      --password, -p    Your password.
-      --directory, -d   Directory to save.
-      --type, -t  source|course Type of download.
+    --email, -e         Your email.
+    --password, -p      Your password.
+    --directory, -d     Directory to save.
+    --type, -t          source|course type of download.
+    --code, -c          Option to download code zip
+    --zip, -z           Option to download source archive
 
-    Examples
-      $ ch
-      $ ch https://coursehunter.net/course/intermediate-typescript/ -t course
-      $ ch -e user@gmail.com -p password -d path-to-directory -t source
+Examples:
+    $ ch
+    $ ch https://coursehunter.net/course/intermediate-typescript/ -t course
+    $ ch -e user@gmail.com -p password -d path-to-directory -t source
 ```
 
 

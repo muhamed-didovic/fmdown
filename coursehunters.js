@@ -73,39 +73,7 @@ const getVideosFromFile = async ({json, course, index, token, downDir, fileName,
 
       return data;
     })
-  //.catch(err => console.log(`${err}`.red, 'DA VIDIMO', err))*/
 };
-
-/*const runGetVideos = async (url) => {
-  const courseUrl = url || process.argv[indexUrlFlag + 1];
-  let downloadFolder = 'videos/' + ((indexDirFlag === -1) ? getLastSegment(courseUrl) : process.argv[indexDirFlag + 1]);
-  console.log('downloadFolder', downloadFolder, '---', path.resolve(process.cwd(), 'videos/'));
-  createFolder(downloadFolder);
-
-  const logger = createLogger(downloadFolder);
-
-  const lessonNumbers = (indexLessonsFlag === -1) ? null : getLessonNumbers(process.argv[indexLessonsFlag + 1]);
-  const videos = [];
-
-  return await getVideos(courseUrl, token)
-    .then(data => {
-      //console.log('1DATA', data);
-      data.result.map((url, i) => {
-        const name = he.decode(data.names[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
-        //console.log('name', name);
-        data.names[i] = name;
-        videos.push({ url, name });
-      });
-      if (data.urlMaterials.length > 0) {
-        downloadAllMaterials(data.urlMaterials, downloadFolder);
-      }
-      console.log('Start download videos, please wait...');
-      downloadVideos(logger, videos, downloadFolder, lessonNumbers);
-
-      return data;
-    })
-    .catch(err => console.log(`${err}`.red, 'DA VIDIMO', err))
-};*/
 
 const logger = ora()
 const run = async ({ json, email, password, downDir, fileName, code, zip }) => {
@@ -117,10 +85,8 @@ const run = async ({ json, email, password, downDir, fileName, code, zip }) => {
     .then(token => {
       return Promise.each(json.courses, (course, index) => getVideosFromFile({json, course, index, token, downDir, fileName, code, zip}))
     })
-    .then(result => {
-      // This will run after the last step is done
+    .then(() => {
       console.log("Done!")
-      // console.log(result);
     })
     .catch(rejection => {
       console.error("Catch: ", rejection);
