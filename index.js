@@ -29,10 +29,13 @@ const coursehunters = require('./coursehunters');
   // const { input, email, password, downDir, type } = await prompt();
   //let r = await startDownloading({ email, password, downDir, type, url: input[0] });
 
-  const { url, email, password, downDir, type } = await scrape.prompt();
+  let inputs = await scrape.prompt();
+  let {url, email, password, downDir, type, code, zip} = await coursehunters.prompt(inputs);
+  // console.log('{url, email, password, downDir, type, code, zip} ', {url, email, password, downDir, type, code, zip} );
   let json = await scrape.run({ url, email, password, downDir, type })
 
   //console.log('111RESULT:', json);
-  await coursehunters.run({ json, email, password, downDir, fileName: json.fileName })
+
+  await coursehunters.run({ json, email, password, downDir, fileName: json.fileName, code, zip })
 })()
 
