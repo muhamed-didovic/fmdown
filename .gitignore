@@ -4,3 +4,4 @@ node_modules
 *.txt
 .DS_Store
 .editorconfig
+videos
