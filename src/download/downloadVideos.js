@@ -92,68 +92,6 @@ const downloadOneVideo = async (logger, downloadFolder, video) => {
   //ora(`Remote/Local:${formatBytes(remoteFileSize)}/${localSizeInBytes} Files are: ${(remoteFileSize === localSize)} File:${downloadFolder}${path.sep}${videoName}.mp4`).fail();
   msg.text = `Different Remote/Local:${formatBytes(remoteFileSize)}/${localSizeInBytes} - Start download video: ${videoName}`.blue;
   return await downloadVideo(url, `${downloadFolder}${path.sep}${videoName}.mp4`, msg)
-
-  /*Promise
-    .resolve()
-    .then(async () => {
-      //download subtitle if exists
-      let subtitleUrl = video.url.replace('.mp4', '.srt');//.vtt
-      const subtitleMsg = ora('Checking the subtitle..').start()
-      await download(subtitleUrl, `${downloadFolder}${path.sep}${videoName}.srt`, subtitleMsg)
-      /!*progress(request(encodeURI(subtitleUrl)), { throttle: 2000, delay: 1000 })
-        .on('response', function (resp) {
-          if (parseInt(resp.statusCode) !== 404) {
-            this.pipe(fs.createWriteStream(`${downloadFolder}${path.sep}${videoName}.srt`));//.vtt
-          } else {
-            //msg.fail(`Subtitle does not exist: ${downloadFolder}${path.sep}${videoName}.srt`);
-            ora(`Subtitle does not exist: ${downloadFolder}${path.sep}${videoName}.srt`).fail()
-          }
-        })
-        .on('progress', function (state) {
-          writeWaitingInfo(state, `${downloadFolder}${path.sep}${videoName}.srt`, msg);
-        })
-        .on('error', err => {
-          console.error(`${err}`.red);
-          // msg.fail(`Subtitle does not exist: ${downloadFolder}${path.sep}${videoName}.srt`);
-          ora(`Subtitle does not exist: ${downloadFolder}${path.sep}${videoName}.srt`).fail()
-        })
-        .on('end', function () {
-          cleanLine();
-          // msg.succeed(`End download subtitle for ${videoName}`.green);
-          ora(`End download subtitle for ${videoName}`).succeed()
-          resolve();
-        });*!/
-    })*/
-
-  /*const msg = ora('Checking size of the video..').start()
-  let remoteFileSize = await fileSize(url);
-  return new Promise((resolve, reject) => {
-    let localSize = getFilesizeInBytes(`${downloadFolder}${path.sep}${videoName}.mp4`)
-    let localSizeInBytes = formatBytes(getFilesizeInBytes(`${downloadFolder}${path.sep}${videoName}.mp4`))
-    //console.log('remoteFileSize === localSize', remoteFileSize, localSize, remoteFileSize === localSize);
-    if (remoteFileSize === localSize) {
-      msg.succeed(`Video already downloaded: ${downloadFolder}${path.sep}${videoName}.mp4`);
-      return resolve();
-    }
-    //ora(`Remote/Local:${formatBytes(remoteFileSize)}/${localSizeInBytes} Files are: ${(remoteFileSize === localSize)} File:${downloadFolder}${path.sep}${videoName}.mp4`).fail();
-    msg.text = `Different Remote/Local:${formatBytes(remoteFileSize)}/${localSizeInBytes} - Start download video: ${videoName}`.blue;
-    progress(request(encodeURI(video.url)), { throttle: 2000, delay: 1000 })
-      .on('progress', function (state) {
-        writeWaitingInfo(state, `${downloadFolder}${path.sep}${videoName}.mp4`, msg);
-      })
-      .on('error', function (err) {
-        msg.fail(`${err}`.red);
-        reject(err)
-      })
-      .on('end', function () {
-        cleanLine();
-        msg.succeed(`End download video ${videoName}`.green);
-        // logger.write(`${videoName}\n`);
-        resolve();
-      })
-      .pipe(fs.createWriteStream(`${downloadFolder}${path.sep}${videoName}.mp4`));
-  })*/
-
 };
 
 /*const downloadSelectively = async (logger, videos, downloadFolder, lessonNumbers) => {

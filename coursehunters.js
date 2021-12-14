@@ -3,22 +3,16 @@ require('app-module-path').addPath(__dirname);
 const Promise = require('bluebird');
 const path = require("path");
 const he = require("he");
-// const colors = require('colors');
-// const request = require("request");
 const fs = require("fs-extra");
-// const progress = require("request-progress");
 const ora = require("ora");
 const prompts = require("prompts");
 const isValidPath = require("is-valid-path");
 const meow = require("meow");
 
-
 const createFolder = require("src/create/createFolder");
 const getVideos = require("src/download/getVideos.js");
 const downloadAllMaterials = require("src/download/downloadMaterials");
 const downloadVideos = require("src/download/downloadVideos");
-// const { writeWaitingInfo } = require("src/download/writeWaitingInfo");
-// const cleanLine = require("src/download/cleanLine");
 const getToken = require("src/download/getToken");
 
 const getLastSegment = url => {
@@ -27,7 +21,6 @@ const getLastSegment = url => {
 };
 
 const getVideosFromFile = async ({json, course, index, token, downDir, fileName, code, zip}) => {
-  // console.log('json---', json, 'index', index, 'downDir', downDir, 'fileName', fileName);
   if (course?.done === true) {
     return;
   }
@@ -37,23 +30,15 @@ const getVideosFromFile = async ({json, course, index, token, downDir, fileName,
   console.log('downloadFolder', downloadFolder);
   createFolder(downloadFolder);
 
-  // const logger = await createLogger(downloadFolder);
-
-  //const lessonNumbers = null;//getLessonNumbers(0);
-
   let source;
   return await getVideos(courseUrl, token)
     .then(async data => {
-      // console.log('1DATA', data);
       source = data;
       let videos=  data.result.map((url, i) => {
         const name = he.decode(data.names[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
-        //console.log('name', name);
         data.names[i] = name;
-        //videos.push({ url, name });
         return { url, name }
       });
-      // console.log('data', data);
       return { videos, data }
     })
     .then(async ({videos, data}) => {
@@ -108,8 +93,8 @@ const cli = meow(`
       
     Examples
       $ ch
-      $ ch test.json
-      $ ch -a -f webm -r high
+      $ code https://coursehunter.net/source/laraveldaily-com -e user@gmail.com -p password
+      
 `, {
   flags: {
     email    : {
@@ -162,7 +147,6 @@ async function prompt({
           flags,
           input
         } = cli
-
 
   flags.directory = downDir;
 
@@ -231,11 +215,8 @@ const getFileName = path => path.replace(/^.*[\\\/]/, '');
 const coursehunters = async () => {
 
   const { input, email, password, downDir, code, zip } = await prompt();
-  console.log('{ input, email, password, downDir, code, zip }', { input, email, password, downDir, code, zip });
-  // console.log('file:', require(options.file));
   const json = require(input[0]);
   if (json?.courses.length > 0) {
-    //file, email, password, downDir
     await run({ json, email, password, downDir, fileName: getFileName(input[0]) });
   }
 }
