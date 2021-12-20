@@ -1,4 +1,4 @@
-# Download videos (course) from coursehunter.net
+# Download videos (course) from coursehunter.net for PRO members (also includes the free ones :))
 [![npm](https://badgen.net/npm/v/chdown)](https://www.npmjs.com/package/chdown)
 
 ## Install
@@ -16,7 +16,7 @@ npx chdown
 ## CLI
 ```sh
 Usage
-    $ chdown <?CourseUrl|SourceUrl>
+    $ chdown <?CourseUrl|SourceUrl|CategoryUrl>
 
 Options
     --email, -e         Your email.

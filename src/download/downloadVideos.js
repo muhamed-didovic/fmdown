@@ -29,7 +29,8 @@ function downloadSubtitle(uri, dest, msg) {
       .on('response', (resp) => {
         if (dest.includes('.srt')) {
           if (parseInt(resp.statusCode) !== 404) {
-            this.pipe(fs.createWriteStream(dest));//`${downloadFolder}${path.sep}${videoName}.srt`//.vtt
+            msg.succeed(`subtitle downloaded for ${dest}`);
+            req.pipe(fs.createWriteStream(dest));//`${downloadFolder}${path.sep}${videoName}.srt`//.vtt
           } else {
             msg.fail(`Subtitle does not exist: ${dest}`);
             //throw new Error (`Subtitle does not exist: ${dest}`)
