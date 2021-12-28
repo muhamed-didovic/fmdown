@@ -16,7 +16,7 @@ npx chdown
 ## CLI
 ```sh
 Usage
-    $ chdown <?CourseUrl|SourceUrl|CategoryUrl>
+    $ chdown [CourseUrl|SourceUrl|CategoryUrl]
 
 Options
     --email, -e         Your email.
@@ -25,11 +25,12 @@ Options
     --type, -t          source|course type of download.
     --code, -c          Option to download code zip
     --zip, -z           Option to download source archive
+    --concurrency, -c
 
 Examples:
     $ ch
     $ ch https://coursehunter.net/course/intermediate-typescript/ -t course
-    $ ch -e user@gmail.com -p password -d path-to-directory -t source
+    $ ch [url] [-e user@gmail.com] [-p password] [-d dirname] [-c number] [-t source]
 ```
 
 
