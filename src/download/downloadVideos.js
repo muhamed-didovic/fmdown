@@ -12,27 +12,33 @@ const cleanLine = require('src/download/cleanLine');
 const { writeWaitingInfo, formatBytes } = require('src/download/writeWaitingInfo');
 const fileSize = require('./fileSize');
 const remote = require('remote-file-size');
-const ora = require("ora");
+// const ora = require("ora");
+
+const Spinnies = require('spinnies')
+const Promise = require("bluebird");
+const ms = new Spinnies();
 
 function getFilesizeInBytes(filename) {
   // console.log('stats', stats);
   return fs.existsSync(filename) ? fs.statSync(filename)["size"] : 0;
 }
 
-function downloadSubtitle(uri, dest, msg) {
+function downloadSubtitle(url, dest, ms, { localSizeInBytes, remoteSizeInBytes }) {
   return new Promise(function (resolve, reject) {
-    let req = request(encodeURI(uri)); //request(uri);
-    progress(req, { throttle: 2000, delay: 1000 })
+    let req = request(encodeURI(url)); //request(url);
+    progress(req)//, { throttle: 2000, delay: 1000 }
       .on('progress', state => {
-        writeWaitingInfo(state, dest, msg);//`${downloadFolder}${path.sep}${videoName}.mp4`
+        writeWaitingInfo(state, dest, ms, url,{ localSizeInBytes, remoteSizeInBytes });//`${downloadFolder}${path.sep}${videoName}.mp4`
       })
       .on('response', (resp) => {
         if (dest.includes('.srt')) {
           if (parseInt(resp.statusCode) !== 404) {
-            msg.succeed(`subtitle downloaded for ${dest}`);
+            //msg.succeed(`subtitle downloaded for ${dest}`);
+            ms.succeed(url, { text: `subtitle downloaded for ${dest}` });
             req.pipe(fs.createWriteStream(dest));//`${downloadFolder}${path.sep}${videoName}.srt`//.vtt
           } else {
-            msg.fail(`Subtitle does not exist: ${dest}`);
+            ms.fail(url, { text: `Subtitle does not exist: ${dest}` });
+            // msg.fail(`Subtitle does not exist: ${dest}`);
             //throw new Error (`Subtitle does not exist: ${dest}`)
             //ora(`Subtitle does not exist: ${downloadFolder}${path.sep}${videoName}.srt`).fail()
           }
@@ -43,56 +49,56 @@ function downloadSubtitle(uri, dest, msg) {
         resolve()
       })
       .on('error', err => {
-        msg.fail(err);
+        ms.fail(url, { text: err });
         reject(err);
       })
 
     //.pipe(fs.createWriteStream(`${downloadFolder}${path.sep}${videoName}.mp4`));
   });
 }
-function downloadVideo(uri, dest, msg) {
+function downloadVideo(url, dest, ms, { localSizeInBytes, remoteSizeInBytes }) {
   return new Promise(function (resolve, reject) {
-    let req = request(encodeURI(uri)); //request(uri);
+    let req = request(encodeURI(url)); //request(url);
     progress(req, { throttle: 2000, delay: 1000 })
       .on('progress', state => {
-        writeWaitingInfo(state, dest, msg);//`${downloadFolder}${path.sep}${videoName}.mp4`
+        writeWaitingInfo(state, dest, ms, url,{ localSizeInBytes, remoteSizeInBytes });//`${downloadFolder}${path.sep}${videoName}.mp4`
       })
       .on('end', () => {
-        msg.succeed(`End download video ${dest}`);
+        ms.succeed(url, { text: `End download video: ${dest.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}` });
         resolve()
       })
       .on('error', err => {
-        msg.fail(err);
+        ms.fail(url, { text: err });
         reject(err);
       })
       .pipe(fs.createWriteStream(dest));
-    //.pipe(fs.createWriteStream(`${downloadFolder}${path.sep}${videoName}.mp4`));
   });
 }
 
-const downloadOneVideo = async (logger, downloadFolder, video) => {
-
+const downloadOneVideo = async (downloadFolder, video, subtitle) => {
   let videoName = sanitize(video.name.replace('Урок ', '').replace('\\', ''));
 
   //download subtitle
-  let subtitleUrl = video.url.replace('.mp4', '.srt');//.vtt
-  const subtitleMsg = ora('Checking the subtitle..').start()
-  await downloadSubtitle(subtitleUrl, `${downloadFolder}${path.sep}${videoName}.srt`, subtitleMsg)
+  if (subtitle) {
+    let subtitleUrl = video.url.replace('.mp4', '.srt');//.vtt
+    ms.add(subtitleUrl, { text: `Checking if subtitle is downloaded: ${videoName}` });
+    await downloadSubtitle(subtitleUrl, `${downloadFolder}${path.sep}${videoName}.srt`, ms, { localSizeInBytes: 0, remoteSizeInBytes: formatBytes(0) })
+  }
 
   //download videos
   let url = encodeURI(video.url)
-  const msg = ora('Checking size of the video..').start()
+  ms.add(url, { text: `Checking if video is downloaded: ${videoName}` });
   let remoteFileSize = await fileSize(url);
   let localSize = getFilesizeInBytes(`${downloadFolder}${path.sep}${videoName}.mp4`)
   let localSizeInBytes = formatBytes(getFilesizeInBytes(`${downloadFolder}${path.sep}${videoName}.mp4`))
   // console.log('remoteFileSize === localSize', remoteFileSize === localSize, formatBytes(remoteFileSize), localSizeInBytes);
   if (remoteFileSize === localSize) {
-    msg.succeed(`Video already downloaded: ${downloadFolder}${path.sep}${videoName}.mp4`);
+    ms.succeed(url, { text: `Video already downloaded: ${videoName}.mp4` });
     return;
   }
-  //ora(`Remote/Local:${formatBytes(remoteFileSize)}/${localSizeInBytes} Files are: ${(remoteFileSize === localSize)} File:${downloadFolder}${path.sep}${videoName}.mp4`).fail();
-  msg.text = `Different Remote/Local:${formatBytes(remoteFileSize)}/${localSizeInBytes} - Start download video: ${videoName}`.blue;
-  return await downloadVideo(url, `${downloadFolder}${path.sep}${videoName}.mp4`, msg)
+
+  ms.update(url, { text: `${localSizeInBytes}/${formatBytes(remoteFileSize)} - Start download video: ${videoName}.mp4` });
+  return await downloadVideo(url, `${downloadFolder}${path.sep}${videoName}.mp4`, ms, { localSizeInBytes, remoteSizeInBytes: formatBytes(remoteFileSize) })
 };
 
 /*const downloadSelectively = async (logger, videos, downloadFolder, lessonNumbers) => {
@@ -113,7 +119,7 @@ const downloadOneVideo = async (logger, downloadFolder, video) => {
   return true;
 };*/
 
-const downloadAll = async (logger, videos, downloadFolder) => {
+const downloadAll = async (videos, downloadFolder, concurrency, subtitle) => {
   /*let x             = findNotExistingVideo(videos, downloadFolder),
       lessonNumbers = [];
   let y = findNotExistingSubtitle(videos, downloadFolder);
@@ -141,18 +147,27 @@ const downloadAll = async (logger, videos, downloadFolder) => {
   /*for (let video of videos) {
     await downloadOneVideo(logger, downloadFolder, video);
   }*/
-  for (let i = 0; i < videos.length; i++) {
+  /*for (let i = 0; i < videos.length; i++) {
     let video = videos[i];
     await downloadOneVideo(logger, downloadFolder, video);
-  }
+  }*/
+
+  await Promise.map(videos, async (video) => {
+    //let cnt = 0
+    await downloadOneVideo(downloadFolder, video, subtitle);
+    //console.log(`DONE - downloaded videos: ${cnt}`);
+  }, {
+    concurrency//: 10
+  })
 };
 
-const downloadVideos = async (logger, videos, downloadFolder) => {
+const downloadVideos = async (videos, downloadFolder, concurrency, subtitle) => {
   /*if (lessonNumbers !== null) {
     await downloadSelectively(logger, videos, downloadFolder, lessonNumbers);
     return true;
   }*/
-  await downloadAll(logger, videos, downloadFolder);
+  // console.log('concurrency', concurrency, subtitle);
+  await downloadAll(videos, downloadFolder, concurrency, subtitle);
   return true;
 };
 

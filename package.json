@@ -1,6 +1,6 @@
 {
 	"name": "chdown",
-	"version": "0.5.1",
+	"version": "0.6.0",
 	"description": "Download courses from https://coursehunter.net/",
 	"main": "index.js",
 	"scripts": {},
@@ -46,6 +46,7 @@
 		"remote-file-size": "^3.0.5",
 		"request": "latest",
 		"request-progress": "^3.0.0",
-		"sanitize-filename": "^1.6.3"
+		"sanitize-filename": "^1.6.3",
+		"spinnies": "^0.5.1"
 	}
 }

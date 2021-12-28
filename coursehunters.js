@@ -20,14 +20,14 @@ const getLastSegment = url => {
   return parts.pop() || parts.pop(); // handle potential trailing slash
 };
 
-const getVideosFromFile = async ({json, course, index, token, downDir, fileName, code, zip}) => {
+const getVideosFromFile = async ({json, course, index, token, downDir, fileName, code, zip, concurrency, subtitle}) => {
   if (course?.done === true) {
     return;
   }
 
   const courseUrl = course?.url;
   let downloadFolder = downDir + path.sep + getLastSegment(courseUrl);
-  console.log('downloadFolder', downloadFolder);
+  //console.log('downloadFolder', downloadFolder);
   createFolder(downloadFolder);
 
   let source;
@@ -44,16 +44,16 @@ const getVideosFromFile = async ({json, course, index, token, downDir, fileName,
     .then(async ({videos, data}) => {
 
       //console.log('Start download videos, please wait...', videos);
-      await downloadVideos(logger, videos, downloadFolder);
-      console.log('COURSE INDEX:', index, json.courses[index].url, 'filename', fileName);
+      await downloadVideos(videos, downloadFolder, concurrency, subtitle);
+      // console.log('COURSE INDEX:', index, json.courses[index].url, 'filename', fileName);
       json.courses[index].done = true;
       fs.writeFileSync(fileName, JSON.stringify(json, null, 2), 'utf8');
       return data;
     })
     .then(async data => {
       if (data.urlMaterials.length > 0) {
-        //console.log('Start download materials, please wait...');
-        await downloadAllMaterials({urlMaterials: data.urlMaterials, downloadFolder, code, zip});
+        // console.log('Start download materials, please wait...');
+        await downloadAllMaterials({urls: data.urlMaterials, downloadFolder, code, zip, concurrency});
       }
 
       return data;
@@ -61,14 +61,22 @@ const getVideosFromFile = async ({json, course, index, token, downDir, fileName,
 };
 
 const logger = ora()
-const run = async ({ json, email, password, downDir, fileName, code, zip }) => {
+const run = async ({ json, email, password, downDir, fileName, code, zip, concurrency, subtitle }) => {
   Promise
     .resolve()
     .then(() => {
       return getToken(email, password);
     })
-    .then(token => {
-      return Promise.each(json.courses, (course, index) => getVideosFromFile({json, course, index, token, downDir, fileName, code, zip}))
+    .then(async token => {
+      return Promise.each(json.courses, (course, index) => getVideosFromFile({json, course, index, token, downDir, fileName, code, zip, concurrency, subtitle}))
+
+      /*await Promise.map(json.courses, async (course, index) => {
+        let cnt = 0
+        await getVideosFromFile({json, course, index, token, downDir, fileName, code, zip})
+        console.log(`DONE - downloaded videos: ${cnt}`);
+      }, {
+        concurrency: 10
+      })*/
     })
     .then(() => {
       console.log("Done!")
@@ -90,6 +98,8 @@ const cli = meow(`
       --type, -t  source|course
       --code, -c 
       --zip, -z
+      --concurrency, -c
+      --subtitle, -s    Download subtitles if available.
       
     Examples
       $ ch
@@ -123,6 +133,16 @@ const cli = meow(`
       alias  : 'z',
       default: false
     },
+    concurrency: {
+      type: 'number',
+      alias: 'c',
+      default: 10
+    },
+    subtitle: {
+      type : 'boolean',
+      alias: 's',
+      default: false
+    },
   }
 })
 
@@ -141,7 +161,8 @@ async function prompt({
   downDir = '',
   type = '',
   code = '',
-  zip = ''
+  zip = '',
+  subtitle = ''
 }) {
   const {
           flags,
@@ -149,6 +170,7 @@ async function prompt({
         } = cli
 
   flags.directory = downDir;
+  flags.subtitle = subtitle;
 
   if (input.length === 0) {
     input.push(await askOrExit({
@@ -199,7 +221,22 @@ async function prompt({
     inactive: 'no'
   })
 
-  return { url: input[0], email, password, downDir, type, code, zip };
+  /*subtitle = flags.subtitle || await askOrExit({
+    type: 'toggle',
+    name: 'value',
+    message: 'Download subtitles of the course if it exists?',
+    initial: flags.subtitle ? 'yes' : 'no',
+    active: 'yes',
+    inactive: 'no'
+  })*/
+
+  const concurrency = flags.concurrency || await askOrExit({
+    type    : 'number',
+    message : `Enter concurrency`,
+    initial : 10
+  })
+
+  return { url: input[0], email, password, downDir, type, code, zip, subtitle, concurrency };
 }
 
 /**
@@ -214,7 +251,7 @@ const getFileName = path => path.replace(/^.*[\\\/]/, '');
 
 const coursehunters = async () => {
 
-  const { input, email, password, downDir, code, zip } = await prompt();
+  const { input, email, password, downDir, code, zip, concurrency } = await prompt();
   const json = require(input[0]);
   if (json?.courses.length > 0) {
     await run({ json, email, password, downDir, fileName: getFileName(input[0]) });

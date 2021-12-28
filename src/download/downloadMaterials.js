@@ -4,15 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const progress = require('request-progress');
 const request = require('request');
+const Spinnies = require('spinnies')
+const ms = new Spinnies();
+
 // const fileSize = require('./fileSize');
 const remote = require('remote-file-size');
 const cleanLine = require('src/download/cleanLine');
 const {writeWaitingInfo, formatBytes } = require('src/download/writeWaitingInfo');
-const ora = require("ora");
+
 const fileSize = require("./fileSize");
+const Promise = require("bluebird");
 
 const getFilesizeInBytes = filename => {
-  // console.log('stats', stats);
   return fs.existsSync(filename) ? fs.statSync(filename)["size"] : 0;
 };
 
@@ -34,48 +37,46 @@ const findDownloadedVideos = downloadFolder => {
 //     }
 //     return false;
 // };
-const downloadMaterial = (uri, dest, msg) => new Promise(function (resolve, reject) {
-  let req = request(encodeURI(uri)); //request(uri);
-  progress(req, { throttle: 2000, delay: 1000 })
+const downloadMaterial = (url, dest, ms, { localSizeInBytes, remoteSizeInBytes}) => new Promise(function (resolve, reject) {
+  let req = request(encodeURI(url)); //request(url);
+  progress(req)//, { throttle: 2000, delay: 1000 }
     .on('progress', state => {
-      writeWaitingInfo(state, dest, msg);//`${downloadFolder}${path.sep}${videoName}.mp4`
+      writeWaitingInfo(state, dest, ms, url,{ localSizeInBytes, remoteSizeInBytes });//`${downloadFolder}${path.sep}${videoName}.mp4`
     })
     .on('end', () => {
-      msg.succeed(`End download video ${dest}`);
+      ms.succeed(url, { text: `End download material ${dest} Found:${localSizeInBytes}/${remoteSizeInBytes}` });
       resolve()
     })
     .on('error', err => {
-      msg.fail(err);
+      ms.fail(url, { text: err });
       reject(err);
     })
     .pipe(fs.createWriteStream(dest));
-  //.pipe(fs.createWriteStream(`${downloadFolder}${path.sep}${videoName}.mp4`));
 });
-const downloadMaterials = async ({material, downloadFolder, code, zip}) => {
-  let materialsName = material.split('/');
+const downloadMaterials = async ({url, downloadFolder, code, zip}) => {
+  let materialsName = url.split('/');
   materialsName = (materialsName.includes('materials') ? 'code-' : '') + materialsName[materialsName.length - 1];
-  let remoteFileSize = await fileSize(encodeURI(material));
-  const msg = ora(`Checking the material..${material}`).start()
+  let remoteFileSize = await fileSize(encodeURI(url));
+  ms.add(url, { text: `Checking if material is downloaded: ${materialsName}` });
 
   if ((!code && materialsName.includes('code'))
     || (!zip && !materialsName.includes('code'))) {
-    msg.succeed(`Material is skipped: ${materialsName}`)
+    ms.succeed(url, { text: `Material is skipped: ${materialsName}.mp4` });
     return;
   }
   let localSizeInBytes = formatBytes(getFilesizeInBytes(`${downloadFolder}${path.sep}${materialsName}`))
   const localSize = getFilesizeInBytes(`${downloadFolder}${path.sep}${materialsName}`)
   // console.log('Remote size - local size: ', remoteFileSize, localSize, 'comparison:', remoteFileSize == localSize);
   if (remoteFileSize === localSize) {//fs.existsSync(materialsName) &&
-    // console.log('Materials exist:', materialsName, remoteFileSize, getFilesizeInBytes(`${downloadFolder}${path.sep}${materialsName}`));
-    msg.succeed(`Material already downloaded: ${downloadFolder}${path.sep}${materialsName}`);
+    ms.succeed(url, { text: `Material already downloaded: ${downloadFolder}${path.sep}${materialsName}` });
     return
   }
 
-  msg.text = `Different Remote/Local:${formatBytes(remoteFileSize)}/${localSizeInBytes} - Start download video: ${materialsName}`;//.blue
-  return await downloadMaterial(material, `${downloadFolder}${path.sep}${materialsName}`, msg)
+  ms.update(url, { text: `${localSizeInBytes}/${formatBytes(remoteFileSize)} - Start download video: ${materialsName}` });
+  return await downloadMaterial(url, `${downloadFolder}${path.sep}${materialsName}`, ms, { localSizeInBytes, remoteSizeInBytes: formatBytes(remoteFileSize) })
 };
 
-const downloadAllMaterials = async ({urlMaterials, downloadFolder, code, zip}) => {
+const downloadAllMaterials = async ({urls, downloadFolder, code, zip, concurrency}) => {
   /*let materialsNumber = [];
   let x = 0;
   for (let i = x; i < urlMaterials.length; i++) {
@@ -83,9 +84,18 @@ const downloadAllMaterials = async ({urlMaterials, downloadFolder, code, zip}) =
   }*/
   // ora(`Will be downloaded materials: ${urlMaterials.join(', ')}`).start();
 
-  for (let material of urlMaterials) {
-    await downloadMaterials({material, downloadFolder, code, zip});
-  }
+  //console.log('urlMaterials', urls);
+  /*for (let url of urls) {
+    await downloadMaterials({url, downloadFolder, code, zip});
+  }*/
+
+  await Promise.map(urls, async (url) => {
+    //let cnt = 0
+    await downloadMaterials({url, downloadFolder, code, zip});
+    //console.log(`DONE - downloaded videos: ${cnt}`);
+  }, {
+    concurrency//: 10
+  })
   /*const loopArray = materials => {
     console.log('loopArray', x, materials[x]);
     downloadMaterials(materials[x], downloadFolder, () => {

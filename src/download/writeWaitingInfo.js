@@ -2,16 +2,16 @@
 
 const cleanLine = require('src/download/cleanLine');
 
-function writeWaitingInfo(state, materialsName, msg) {
+function writeWaitingInfo(state, materialsName, ms, random, {localSizeInBytes, remoteSizeInBytes}) {
   cleanLine();
   const percent = (state.percent * 100).toFixed(2),
         transferred = formatBytes(state.size.transferred),
         total = formatBytes(state.size.total),
         remaining = secondsToHms(state.time.remaining),
         speed = formatBytes(state.speed),
-        t = `Downloading: ${percent}% | ${transferred} / ${total} | ${speed}/sec | ${remaining} - ${materialsName}`;
+        t = `Downloading: ${percent}% | ${transferred} / ${total} | ${speed}/sec | ${remaining} - ${materialsName.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}`;
   //process.stdout.write(text);
-  msg.text = t
+  ms.update(random, { text: t, color: 'blue' });
 }
 
 function formatBytes(bytes, decimals) {

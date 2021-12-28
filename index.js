@@ -12,12 +12,12 @@ const coursehunters = require('./coursehunters');
   let inputs = await scrape.prompt();
 
   //get additional flags for user input
-  let {url, email, password, downDir, type, code, zip} = await coursehunters.prompt(inputs);
+  let {url, email, password, downDir, type, code, zip, concurrency, subtitle} = await coursehunters.prompt(inputs);
 
   //get courses in json from ch-scrape package
   let json = await scrape.run({ url, email, password, downDir, type })
 
   //download courses
-  await coursehunters.run({ json, email, password, downDir, fileName: json.fileName, code, zip })
+  await coursehunters.run({ json, email, password, downDir, fileName: json.fileName, code, zip, concurrency, subtitle })
 })()
 
