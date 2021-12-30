@@ -172,6 +172,10 @@ async function prompt({
   flags.directory = downDir;
   flags.subtitle = subtitle;
 
+  if (url) {
+    input.push(url)
+  }
+
   if (input.length === 0) {
     input.push(await askOrExit({
       type: 'text',
