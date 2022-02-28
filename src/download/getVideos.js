@@ -80,7 +80,7 @@ const getVideos = async (url, token) => {
             // console.log('etCourseMaterialsUrl($)', getCourseMaterialsUrl($));
             resolve({
               result: lessonsData.map((lesson) => lesson.file),
-              names: lessonsData.map((lesson) => {
+              titles: lessonsData.map((lesson) => {
                 const str = lesson.title.replace(
                   /\s\|\s\d{2}:\d{2}:\d{2}/g,
                   ""

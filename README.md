@@ -28,9 +28,10 @@ Options
     --concurrency, -c
 
 Examples:
-    $ ch
-    $ ch https://coursehunter.net/course/intermediate-typescript/ -t course
-    $ ch [url] [-e user@gmail.com] [-p password] [-d dirname] [-c number] [-t source]
+    $ chdown
+    $ chdown https://coursehunter.net/course/intermediate-typescript/ -t course
+    $ chdown [url] [-e user@gmail.com] [-p password] [-d dirname] [-c number] [-t source]
+    $ chdown --all [-e user@mail.com] [-p password] [-t source-or-course] [-d path-to-directory] [-cc concurrency-number]
 ```
 
 

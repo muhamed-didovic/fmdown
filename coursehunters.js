@@ -1,66 +1,116 @@
 "use strict";
-require('app-module-path').addPath(__dirname);
-const Promise = require('bluebird');
-const path = require("path");
-const he = require("he");
-const fs = require("fs-extra");
-const ora = require("ora");
-const prompts = require("prompts");
-const isValidPath = require("is-valid-path");
-const meow = require("meow");
+require('app-module-path').addPath(__dirname)
+const Promise = require('bluebird')
+const path = require("path")
+const he = require("he")
+const fs = require("fs-extra")
+const prompts = require("prompts")
+const isValidPath = require("is-valid-path")
+const meow = require("meow")
 
-const createFolder = require("src/create/createFolder");
-const getVideos = require("src/download/getVideos.js");
-const downloadAllMaterials = require("src/download/downloadMaterials");
-const downloadVideos = require("src/download/downloadVideos");
-const getToken = require("src/download/getToken");
+const createFolder = require("src/create/createFolder")
+const getVideos = require("src/download/getVideos.js")
+const downloadAllMaterials = require("src/download/downloadMaterials")
+const downloadVideos = require("src/download/downloadVideos")
+const downOverYoutubeDL = require("src/download/downOverYoutubeDL")
+const getToken = require("src/download/getToken")
+
+const Spinnies = require('dreidels')
+const downloadSubtitle = require("./src/download/downloadSubtitle");
+const ms = new Spinnies()
 
 const getLastSegment = url => {
   let parts = url.split('/');
   return parts.pop() || parts.pop(); // handle potential trailing slash
 };
 
-const getVideosFromFile = async ({json, course, index, token, downDir, fileName, code, zip, concurrency, subtitle}) => {
+const getVideosFromFile = async ({
+  json,
+  course,
+  index,
+  token,
+  downDir,
+  fileName,
+  code,
+  zip,
+  concurrency,
+  subtitle
+}) => {
   if (course?.done === true) {
     return;
   }
 
   const courseUrl = course?.url;
-  let downloadFolder = downDir + path.sep + getLastSegment(courseUrl);
-  //console.log('downloadFolder', downloadFolder);
-  createFolder(downloadFolder);
+  let downloadFolder = path.join(downDir, getLastSegment(courseUrl));
+  // console.log('downloadFolder', downloadFolder);
+  // createFolder(downloadFolder);
 
   let source;
   return await getVideos(courseUrl, token)
     .then(async data => {
       source = data;
-      let videos=  data.result.map((url, i) => {
-        const name = he.decode(data.names[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
-        data.names[i] = name;
-        return { url, name }
+      let videos = data.result.map((url, i) => {
+        const title = he.decode(data.titles[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
+        data.titles[i] = title;
+        return { url, title }
       });
       return { videos, data }
     })
-    .then(async ({videos, data}) => {
+    .then(async ({ videos, data }) => {
+      //download subtitles
+      if (subtitle) {
+        let cnt = 0
+        await Promise.map(videos, async (video, index) => {
+          // console.log('downloadFolder', downloadFolder);
+          const dest = path.resolve(downloadFolder)
+          fs.ensureDir(dest)
+          await downloadSubtitle({video, downloadFolder: path.join(dest, `${course.title}.srt`), ms})
+          cnt++
+        }, {
+          concurrency// : 1
+        })
+        ms.stopAll();
+      }
+      return { videos, data }
+    })
+    .then(async ({ videos, data }) => {
+      // await downloadVideos(videos, downloadFolder, concurrency, subtitle);
 
-      //console.log('Start download videos, please wait...', videos);
-      await downloadVideos(videos, downloadFolder, concurrency, subtitle);
+      /*if (data.done) {
+        console.log('Course is downloaded:', data.title);
+        return data;
+      }*/
+
+      await Promise.map(videos, async (course, index) => {
+        const dest = path.resolve(downloadFolder)
+        fs.ensureDir(dest)
+        await downOverYoutubeDL(course.url, path.join(dest, (`${course.title}.mp4`).replace('/', '\u2215')), {
+          downFolder: dest,
+          index,
+          ms
+        })
+
+      }, {
+        concurrency// : 1
+      })
+      ms.stopAll();
+
       // console.log('COURSE INDEX:', index, json.courses[index].url, 'filename', fileName);
       json.courses[index].done = true;
-      fs.writeFileSync(path.join(process.cwd(), 'courses.json'), JSON.stringify(json, null, 2), 'utf8');
+      fs.writeFileSync(fileName, JSON.stringify(json, null, 2), 'utf8');
       return data;
     })
     .then(async data => {
       if (data.urlMaterials.length > 0) {
         // console.log('Start download materials, please wait...');
-        await downloadAllMaterials({urls: data.urlMaterials, downloadFolder, code, zip, concurrency});
+        await downloadAllMaterials({ urls: data.urlMaterials, downloadFolder, code, zip, concurrency });
       }
 
       return data;
     })
 };
 
-const logger = ora()
+//const logger = ora()
 const run = async ({ json, email, password, downDir, fileName, code, zip, concurrency, subtitle }) => {
   Promise
     .resolve()
@@ -68,7 +118,18 @@ const run = async ({ json, email, password, downDir, fileName, code, zip, concur
       return getToken(email, password);
     })
     .then(async token => {
-      return Promise.each(json.courses, (course, index) => getVideosFromFile({json, course, index, token, downDir, fileName, code, zip, concurrency, subtitle}))
+      return Promise.each(json.courses, (course, index) => getVideosFromFile({
+        json,
+        course,
+        index,
+        token,
+        downDir,
+        fileName,
+        code,
+        zip,
+        concurrency,
+        subtitle
+      }))
 
       /*await Promise.map(json.courses, async (course, index) => {
         let cnt = 0
@@ -89,7 +150,7 @@ const run = async ({ json, email, password, downDir, fileName, code, zip, concur
 
 const cli = meow(`
     Usage
-      $ ch <?courseUrl>
+      $ chdown <?courseUrl>
 
     Options
       --email, -e 
@@ -102,47 +163,20 @@ const cli = meow(`
       --subtitle, -s    Download subtitles if available.
       
     Examples
-      $ ch
-      $ code https://coursehunter.net/source/laraveldaily-com -e user@gmail.com -p password
+      $ chdown
+      $ chdown https://coursehunter.net/source/laraveldaily-com [-e user@gmail.com] [-p password]
+      $ chdown --all [-e user@mail.com] [-p password] [-t source-or-course] [-d path-to-directory] [-cc concurrency-number]
       
 `, {
   flags: {
-    email    : {
-      type : 'string',
-      alias: 'e'
-    },
-    password : {
-      type : 'string',
-      alias: 'p'
-    },
-    directory: {
-      type : 'string',
-      alias: 'd'
-    },
-    type     : {
-      type : 'string',
-      alias: 't'
-    },
-    code     : {
-      type   : 'boolean',
-      alias  : 'c',
-      default: true
-    },
-    zip      : {
-      type   : 'boolean',
-      alias  : 'z',
-      default: false
-    },
-    concurrency: {
-      type: 'number',
-      alias: 'c',
-      default: 10
-    },
-    subtitle: {
-      type : 'boolean',
-      alias: 's',
-      default: false
-    },
+    email      : { type: 'string', alias: 'e' },
+    password   : { type: 'string', alias: 'p' },
+    directory  : { type: 'string', alias: 'd' },
+    type       : { type: 'string', alias: 't' },
+    code       : { type: 'boolean', alias: 'c', default: true },
+    zip        : { type: 'boolean', alias: 'z', default: false },
+    concurrency: { type: 'number', alias: 'c', default: 10 },
+    subtitle   : { type: 'boolean', alias: 's', default: false },
   }
 })
 
@@ -208,20 +242,20 @@ async function prompt({
   }))
 
   code = await askOrExit({
-    type: 'toggle',
-    name: 'value',
-    message: 'Download code if it exists?',
-    initial: flags.code,
-    active: 'yes',
+    type    : 'toggle',
+    name    : 'value',
+    message : 'Download code if it exists?',
+    initial : flags.code,
+    active  : 'yes',
     inactive: 'no'
   })
 
   zip = await askOrExit({
-    type: 'toggle',
-    name: 'value',
-    message: 'Download archive of the course if it exists?',
-    initial: flags.zip,
-    active: 'yes',
+    type    : 'toggle',
+    name    : 'value',
+    message : 'Download archive of the course if it exists?',
+    initial : flags.zip,
+    active  : 'yes',
     inactive: 'no'
   })
 
@@ -235,9 +269,9 @@ async function prompt({
   })*/
 
   const concurrency = flags.concurrency || await askOrExit({
-    type    : 'number',
-    message : `Enter concurrency`,
-    initial : 10
+    type   : 'number',
+    message: `Enter concurrency`,
+    initial: 10
   })
 
   return { url: input[0], email, password, downDir, type, code, zip, subtitle, concurrency };
