@@ -47,7 +47,7 @@ const getVideosFromFile = async ({json, course, index, token, downDir, fileName,
       await downloadVideos(videos, downloadFolder, concurrency, subtitle);
       // console.log('COURSE INDEX:', index, json.courses[index].url, 'filename', fileName);
       json.courses[index].done = true;
-      fs.writeFileSync(fileName, JSON.stringify(json, null, 2), 'utf8');
+      fs.writeFileSync(path.join(process.cwd(), 'courses.json'), JSON.stringify(json, null, 2), 'utf8');
       return data;
     })
     .then(async data => {
