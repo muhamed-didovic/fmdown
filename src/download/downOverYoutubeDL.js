@@ -100,7 +100,6 @@ const downloadVideo = async (url, dest, {
  */
 module.exports = async (url, dest, { downFolder, index, ms } = {}) => {
     url = encodeURI(url)
-    console.log('dest', dest);
     //const dest = path.join(downloadFolder, course.title)
 
     ms.add(dest, { text: `Checking if video is downloaded: ${dest.split('/').pop()}` });
