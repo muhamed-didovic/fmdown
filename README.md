@@ -19,15 +19,17 @@ Usage
     $ chdown [CourseUrl|SourceUrl|CategoryUrl]
 
 Options
-    --all, -a           Get all courses.
-    --email, -e         Your email.
-    --password, -p      Your password.
-    --directory, -d     Directory to save.
-    --type, -t          source|course type of download.
-    --subtitle, -s      Download subtitles if available.
-    --code, -c          Option to download code zip
-    --zip, -z           Option to download source archive
-    --concurrency, -c
+  --all, -a         Get all courses.
+  --email, -e       Your email. 
+  --password, -p    Your password.
+  --directory, -d   Directory to save.
+  --type, -t        source|course Type of download.
+  --videos, -v      Include videos if available. 
+  --subtitle, -s    Include subtitles if available.
+  --zip, -z         Include archive if available.
+  --code, -c        Include code if available.
+  --lang, -l        Include courses of certain language ('en', 'ru' or 'both')
+  --concurrency, -cc
 
 Examples:
     $ chdown
