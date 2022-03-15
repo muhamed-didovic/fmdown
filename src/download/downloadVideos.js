@@ -5,25 +5,22 @@ const path = require('path');
 const progress = require('request-progress');
 const request = require('request');
 const sanitize = require("sanitize-filename");
+const Promise = require("bluebird");
 
-const findNotExistingVideo = require('src/download/findNotExistingVideo');
-const findNotExistingSubtitle = require('src/download/findNotExistingSubtitle');
-const cleanLine = require('src/download/cleanLine');
+// const findNotExistingVideo = require('src/download/findNotExistingVideo');
+// const findNotExistingSubtitle = require('src/download/findNotExistingSubtitle');
+// const cleanLine = require('src/download/cleanLine');
 const { writeWaitingInfo, formatBytes } = require('src/download/writeWaitingInfo');
 const fileSize = require('./fileSize');
-const remote = require('remote-file-size');
-// const ora = require("ora");
+// const remote = require('remote-file-size');
 
-const Spinnies = require('spinnies')
-const Promise = require("bluebird");
+const Spinnies = require('spinnies');
 const ms = new Spinnies();
 
 function getFilesizeInBytes(filename) {
   // console.log('stats', stats);
   return fs.existsSync(filename) ? fs.statSync(filename)["size"] : 0;
 }
-
-
 
 function downloadVideo(url, dest, ms, { localSizeInBytes, remoteSizeInBytes }) {
   return new Promise(function (resolve, reject) {

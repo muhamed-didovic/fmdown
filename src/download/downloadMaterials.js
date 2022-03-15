@@ -1,19 +1,18 @@
 'use strict';
-
-const fs = require('fs');
+const Promise = require("bluebird");
+const fs = require('fs-extra');
 const path = require('path');
 const progress = require('request-progress');
 const request = require('request');
-const Spinnies = require('spinnies')
-const ms = new Spinnies();
 
-// const fileSize = require('./fileSize');
 const remote = require('remote-file-size');
 const cleanLine = require('src/download/cleanLine');
 const {writeWaitingInfo, formatBytes } = require('src/download/writeWaitingInfo');
-
 const fileSize = require("./fileSize");
-const Promise = require("bluebird");
+
+const Spinnies = require('spinnies');
+const ms = new Spinnies();
+
 
 const getFilesizeInBytes = filename => {
   return fs.existsSync(filename) ? fs.statSync(filename)["size"] : 0;
@@ -38,8 +37,8 @@ const findDownloadedVideos = downloadFolder => {
 //     return false;
 // };
 const downloadMaterial = (url, dest, ms, { localSizeInBytes, remoteSizeInBytes}) => new Promise(function (resolve, reject) {
-  let req = request(encodeURI(url)); //request(url);
-  progress(req)//, { throttle: 2000, delay: 1000 }
+  let req = request(url);//request(encodeURI(url));
+  progress(req, { throttle: 2000, delay: 1000 })//
     .on('progress', state => {
       writeWaitingInfo(state, dest, ms, url,{ localSizeInBytes, remoteSizeInBytes });//`${downloadFolder}${path.sep}${videoName}.mp4`
     })
@@ -48,7 +47,8 @@ const downloadMaterial = (url, dest, ms, { localSizeInBytes, remoteSizeInBytes})
       resolve()
     })
     .on('error', err => {
-      ms.fail(url, { text: err });
+      console.log('eeeeeeerrrrrr:::', err);
+      ms.remove(url);
       reject(err);
     })
     .pipe(fs.createWriteStream(dest));
@@ -57,23 +57,24 @@ const downloadMaterials = async ({url, downloadFolder, code, zip}) => {
   let materialsName = url.split('/');
   materialsName = (materialsName.includes('materials') ? 'code-' : '') + materialsName[materialsName.length - 1];
   let remoteFileSize = await fileSize(encodeURI(url));
-  ms.add(url, { text: `Checking if material is downloaded: ${materialsName}` });
 
+  ms.add(url, { text: `Checking if material is downloaded: ${materialsName}` });
   if ((!code && materialsName.includes('code'))
     || (!zip && !materialsName.includes('code'))) {
     ms.succeed(url, { text: `Material is skipped: ${materialsName}.mp4` });
     return;
   }
-  let localSizeInBytes = formatBytes(getFilesizeInBytes(`${downloadFolder}${path.sep}${materialsName}`))
-  const localSize = getFilesizeInBytes(`${downloadFolder}${path.sep}${materialsName}`)
-  // console.log('Remote size - local size: ', remoteFileSize, localSize, 'comparison:', remoteFileSize == localSize);
+  const localPath = path.resolve(downloadFolder,materialsName)
+  let localSizeInBytes = formatBytes(getFilesizeInBytes(localPath))
+  const localSize = getFilesizeInBytes(localPath)
+  //console.log('Remote size - local size: ', remoteFileSize, localSize, 'comparison:', remoteFileSize === localSize);
   if (remoteFileSize === localSize) {//fs.existsSync(materialsName) &&
-    ms.succeed(url, { text: `Material already downloaded: ${downloadFolder}${path.sep}${materialsName}` });
+    ms.succeed(url, { text: `Material already downloaded: ${localPath}` });
     return
   }
 
   ms.update(url, { text: `${localSizeInBytes}/${formatBytes(remoteFileSize)} - Start download video: ${materialsName}` });
-  return await downloadMaterial(url, `${downloadFolder}${path.sep}${materialsName}`, ms, { localSizeInBytes, remoteSizeInBytes: formatBytes(remoteFileSize) })
+  return await downloadMaterial(url, localPath, ms, { localSizeInBytes, remoteSizeInBytes: formatBytes(remoteFileSize) })
 };
 
 const downloadAllMaterials = async ({urls, downloadFolder, code, zip, concurrency}) => {

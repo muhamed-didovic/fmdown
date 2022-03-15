@@ -2,45 +2,26 @@
 
 const cheerio = require("cheerio");
 let request = require("request");
+const he = require("he");
 request = request.defaults({
   jar: true,
 });
 
-const videoMaterialScriptContainerSelector = ".main-content script:nth-of-type(3)";
 
 const getCourseId = ($) => {
-  // console.log('da vidmo', $('form input[name="course_id"]').attr("value"));
   return $('form input[name="course_id"]').attr("value")
-  // const lessonsScriptContainer = $(videoMaterialScriptContainerSelector);
-  // console.log('lessonsScriptContainer.get()', lessonsScriptContainer.get());
-  // if (lessonsScriptContainer.get().length) {
-  //   const lessonsScriptCode = lessonsScriptContainer.get()[0].children[0].data;
-  //
-  //   const courseId = lessonsScriptCode
-  //     .replace(/\s/g, "")
-  //     .match(/axios.get\('\/course\/(\d+)\/lessons'\)/g)[0]
-  //     .match(/\d+/)[0];
-  //
-  //   return courseId;
-  // } else {
-  //   return null;
-  // }
 };
 
-const courseMaterialsAnchorSelector = ".book-wrap-poster a:nth-of-type(2)";
 const getCourseMaterialsUrl = ($) => {
   let urlMaterials = [];
   $('.book-wrap-poster').find('a').map((i, elem) => {
-    // console.log('iii', i, 'elem:', $(elem).attr('href'));
     urlMaterials.push($(elem).attr('href'));
-    // return $(elem).attr('href')
   });
   return urlMaterials
-  // const materialsAnchorEl = $(courseMaterialsAnchorSelector);
-  // return materialsAnchorEl.get()[0]?.attribs.href;
 };
 
-const getVideos = async (url, token) => {
+
+const getVideosOld = async (url, token) => {
   const options = { url };
   if (token) {
     const cookie = request.cookie(token);
@@ -102,5 +83,13 @@ const getVideos = async (url, token) => {
     });
   });
 };
+
+const getVideos = async (course) => {
+
+  let episodes = course.chapters.map((url, i) => {
+    return { url, title: course.names[i] }
+  });
+  return { episodes, data: course };
+}
 
 module.exports = getVideos;
