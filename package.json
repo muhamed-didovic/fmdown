@@ -1,6 +1,6 @@
 {
 	"name": "chdown",
-	"version": "0.9.5",
+	"version": "0.10.0",
 	"description": "Download courses from https://coursehunter.net/",
 	"main": "index.js",
 	"scripts": {},
@@ -15,8 +15,10 @@
 	],
 	"keywords": [
 		"download",
+		"downloader",
 		"nodejs",
-		"js"
+		"coursehunter-downloader",
+		"coursehunter"
 	],
 	"author": "Muhamed Didovic (github.com/muhamed-didovic)",
 	"license": "MIT",
