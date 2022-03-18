@@ -7,9 +7,9 @@ const getFilesizeInBytes = filename => {
 
 const createLogger = downloadFolder => {
     const logFile = `${downloadFolder}${path.sep}videos.txt`
-   /* fs.existsSync(logFile) ?
-        console.log(`File ${logFile} already exists`) :
-        console.log(`File ${logFile} created`);*/
+    /* fs.existsSync(logFile) ?
+         console.log(`File ${logFile} already exists`) :
+         console.log(`File ${logFile} created`);*/
     const logger = fs.createWriteStream(logFile, { flags: 'a' });
     return logger;
 };

@@ -15,6 +15,8 @@ const downOverYoutubeDL = require("src/download/downOverYoutubeDL")
 const getToken = require("src/download/getToken")
 
 const Spinnies = require('dreidels')
+const fileSize = require("./src/download/fileSize");
+const { formatBytes } = require("./src/download/writeWaitingInfo");
 const ms = new Spinnies()
 
 // const downloadVideos = require("src/download/downloadVideos")
@@ -45,10 +47,16 @@ const getVideosFromFile = async ({
 
   const courseUrl = course?.url;
   let downloadFolder = path.join(downDir, getLastSegment(courseUrl));
-  // console.log('downloadFolder', downloadFolder);
-  let source;
-  return await getVideos(course)
-    /*.then(async data => {
+  fs.ensureDir(downloadFolder)
+
+  // let source;
+  return Promise
+    .resolve(course)
+    .then(async course => await getVideos(course))
+
+    /*
+    .getVideos(course)
+    .then(async data => {
       source = data;
       let episodes = data.result.map((url, i) => {
         const title = he.decode(data.titles[i].toString());//.replace(/[^A-Za-zА-Яа-я\d\s]/gmi, ''); // alelov
@@ -62,10 +70,7 @@ const getVideosFromFile = async ({
       if (subtitle) {
         let cnt = 0
         await Promise.map(episodes, async (video, index) => {
-          // console.log('downloadFolder', downloadFolder);
-          const dest = path.resolve(downloadFolder)
-          fs.ensureDir(dest)
-          await downloadSubtitle({ video, downloadFolder: path.join(dest, `${course.title}.srt`), ms })
+          await downloadSubtitle({ video, downloadFolder: path.join(downloadFolder, `${course.title}.srt`), ms })
           cnt++
         }, {
           concurrency// : 1
@@ -84,10 +89,8 @@ const getVideosFromFile = async ({
       }*/
       if (videos) {
         await Promise.map(episodes, async (course, index) => {
-          const dest = path.resolve(downloadFolder)
-          fs.ensureDir(dest)
-          await downOverYoutubeDL(course.url, path.join(dest, (`${course.title}.mp4`).replace('/', '\u2215')), {
-            downFolder: dest,
+          await downOverYoutubeDL(course.url, path.join(downloadFolder, (`${course.title}.mp4`).replace('/', '\u2215')), {
+            downFolder: downloadFolder,
             index,
             ms
           })
@@ -100,11 +103,34 @@ const getVideosFromFile = async ({
       return data;
     })
     .then(async data => {
-      if (data.urlMaterials.length > 0) {
-        const dest = path.resolve(downloadFolder)
-        fs.ensureDir(dest)
+      /*if (data.urlMaterials.length > 0) {
         // console.log('Start download materials, please wait...');
         await downloadAllMaterials({ urls: data.urlMaterials, downloadFolder, code, zip, concurrency });
+      }*/
+      if (data.urlMaterials.length > 0) {
+        // console.log('downloadFolder', downloadFolder);
+        await Promise.map(data.urlMaterials, async (url, index) => {
+          let materialsName = url.split('/');
+          materialsName = (materialsName.includes('materials') ? 'code-' : '') + materialsName[materialsName.length - 1];
+
+          // let file = path.join(dest, materialsName).replace('/', '\u2215')
+          //ms.add(url, { text: `Checking if material is downloaded: ${materialsName}` });
+          if ((!code && materialsName.includes('code'))
+            || (!zip && !materialsName.includes('code'))) {
+            console.log('skipping materials');
+            //ms.succeed(url, { text: `Material is skipped: ${materialsName}` });
+            return;
+          } else {
+            // ms.remove(url)
+          }
+          return await downOverYoutubeDL(url, path.join(downloadFolder, materialsName), {
+            downFolder: downloadFolder,
+            index,
+            ms
+          })
+        }, {
+          concurrency//: 10
+        })
       }
 
       json.courses[index].done = true;
@@ -148,6 +174,7 @@ const run = async ({ json, fileName, email, password, downDir, code, zip, concur
       console.log("Done!")
     })
     .catch(rejection => {
+      //console.error('course url', course.url);
       console.error("Catch::: ", rejection);
     });
 };

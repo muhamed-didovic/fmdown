@@ -11,8 +11,8 @@ const Promise = require("bluebird");
 // const findNotExistingSubtitle = require('src/download/findNotExistingSubtitle');
 // const cleanLine = require('src/download/cleanLine');
 const { writeWaitingInfo, formatBytes } = require('src/download/writeWaitingInfo');
-const fileSize = require('./fileSize');
-// const remote = require('remote-file-size');
+const fileSize = require('promisify-remote-file-size')
+
 
 const Spinnies = require('spinnies');
 const ms = new Spinnies();

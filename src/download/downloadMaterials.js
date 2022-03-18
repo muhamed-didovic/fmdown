@@ -8,8 +8,10 @@ const request = require('request');
 const remote = require('remote-file-size');
 const cleanLine = require('src/download/cleanLine');
 const {writeWaitingInfo, formatBytes } = require('src/download/writeWaitingInfo');
-const fileSize = require("./fileSize");
+const fileSize = require('promisify-remote-file-size')
 
+const { createLogger, isCompletelyDownloaded } = require('./fileChecker');
+const downOverYoutubeDL = require("./downOverYoutubeDL");
 const Spinnies = require('spinnies');
 const ms = new Spinnies();
 
@@ -52,29 +54,46 @@ const downloadMaterial = (url, dest, ms, { localSizeInBytes, remoteSizeInBytes})
       reject(err);
     })
     .pipe(fs.createWriteStream(dest));
+
 });
-const downloadMaterials = async ({url, downloadFolder, code, zip}) => {
+const downloadMaterials = async ({url, downloadFolder, code, zip, index}) => {
   let materialsName = url.split('/');
   materialsName = (materialsName.includes('materials') ? 'code-' : '') + materialsName[materialsName.length - 1];
-  let remoteFileSize = await fileSize(encodeURI(url));
+  let remoteFileSize = 0;
+  try {
+    const response = await fileSize(encodeURI(url));
+    remoteFileSize = response?.headers['content-length'] ?? 0
+  } catch (err) {
+    console.log('ISSUE WITH THE URL:', url);
+    // console.log('ERROR WITH THE URL:', err);
+    //return Promise.resolve();
+  }
 
   ms.add(url, { text: `Checking if material is downloaded: ${materialsName}` });
   if ((!code && materialsName.includes('code'))
     || (!zip && !materialsName.includes('code'))) {
-    ms.succeed(url, { text: `Material is skipped: ${materialsName}.mp4` });
+    ms.succeed(url, { text: `Material is skipped: ${materialsName}` });
     return;
   }
-  const localPath = path.resolve(downloadFolder,materialsName)
+  const localPath = path.resolve(downloadFolder, materialsName)
+  console.log('localPath', localPath);
   let localSizeInBytes = formatBytes(getFilesizeInBytes(localPath))
   const localSize = getFilesizeInBytes(localPath)
   //console.log('Remote size - local size: ', remoteFileSize, localSize, 'comparison:', remoteFileSize === localSize);
   if (remoteFileSize === localSize) {//fs.existsSync(materialsName) &&
-    ms.succeed(url, { text: `Material already downloaded: ${localPath}` });
+    //ms.succeed(url, { text: `Material already downloaded: ${localPath}` });
+    ms.remove(url);
     return
   }
 
   ms.update(url, { text: `${localSizeInBytes}/${formatBytes(remoteFileSize)} - Start download video: ${materialsName}` });
-  return await downloadMaterial(url, localPath, ms, { localSizeInBytes, remoteSizeInBytes: formatBytes(remoteFileSize) })
+  // return await downloadMaterial(url, localPath, ms, { localSizeInBytes, remoteSizeInBytes: formatBytes(remoteFileSize) })
+
+  return await downOverYoutubeDL(url, localPath.replace('/', '\u2215'), {
+    downFolder: dest,
+    index,
+    ms
+  })
 };
 
 const downloadAllMaterials = async ({urls, downloadFolder, code, zip, concurrency}) => {
@@ -90,9 +109,9 @@ const downloadAllMaterials = async ({urls, downloadFolder, code, zip, concurrenc
     await downloadMaterials({url, downloadFolder, code, zip});
   }*/
 
-  await Promise.map(urls, async (url) => {
+  await Promise.map(urls, async (url, index) => {
     //let cnt = 0
-    await downloadMaterials({url, downloadFolder, code, zip});
+    await downloadMaterials({url, downloadFolder, code, zip, index});
     //console.log(`DONE - downloaded videos: ${cnt}`);
   }, {
     concurrency//: 10

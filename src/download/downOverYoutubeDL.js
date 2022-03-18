@@ -1,5 +1,5 @@
 // @ts-check
-const fileSize = require('./fileSize')
+const fileSize = require('promisify-remote-file-size')
 const { formatBytes, writeWaitingInfoDL } = require('./writeWaitingInfo');
 const { createLogger, isCompletelyDownloaded } = require('./fileChecker');
 const path = require('path')
@@ -30,7 +30,6 @@ const download = (url, dest, {
         color: 'blue'
     });
     // console.log(`to be processed by youtube-dl... ${dest.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}`)
-
     const youtubeDlWrap = new youtubedl()
     let youtubeDlEventEmitter = youtubeDlWrap
         .exec([url, "-o", path.toNamespacedPath(dest)])
@@ -50,7 +49,7 @@ const download = (url, dest, {
         .on("close", () => {
             // ms.succeed(dest, { text: `${index}. End download ytdl: ${dest} Found:${localSizeInBytes}/${remoteSizeInBytes} - Size:${formatBytes(getFilesizeInBytes(dest))}` })//.split('/').pop()
             ms.remove(dest);
-            console.log(`${index}. End download ytdl: ${dest} Found:${localSizeInBytes}/${remoteSizeInBytes} - Size:${formatBytes(getFilesizeInBytes(dest))}`.blue);
+            console.log(`${index}. End download ytdl: ${dest} compare L/R:${localSizeInBytes}/${remoteSizeInBytes} - Local in bytes:${formatBytes(getFilesizeInBytes(dest))}`.blue);
             videoLogger.write(`${dest} Size:${getFilesizeInBytes(dest)}\n`);
             resolve()
         })
@@ -105,7 +104,17 @@ module.exports = async (url, dest, { downFolder, index, ms } = {}) => {
     ms.add(dest, { text: `Checking if video is downloaded: ${dest.split('/').pop()}` });
     // console.log(`Checking if video is downloaded: ${dest.split('/').pop()}`);
     let isDownloaded = false;
-    let remoteFileSize = await fileSize(url);
+    // let remoteFileSize = await fileSize(url);
+    // console.log('---remoteFileSize', remoteFileSize);
+    let remoteFileSize = 0;
+    try {
+        remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
+    } catch (err) {
+        if (err.message === 'Received invalid status code: 404'){
+            console.log('1ERROR WITH THE URL:', url, err.message);
+            return Promise.resolve();
+        }
+    }
     let localSize = getFilesizeInBytes(`${dest}`)
     let localSizeInBytes = formatBytes(getFilesizeInBytes(`${dest}`))
 
@@ -113,14 +122,12 @@ module.exports = async (url, dest, { downFolder, index, ms } = {}) => {
     // console.log(`Checking ${localSizeInBytes}/${formatBytes(remoteFileSize)} isCompletelyDownloaded: ${isDownloaded} for ${dest}`);
     // console.log(`Checking ${localSizeInBytes}/${formatBytes(remoteFileSize)} isCompletelyDownloaded: ${isDownloaded} for ${dest}`);
     ms.update(dest, { text: `Checking size over file: ${formatBytes(remoteFileSize)} isCompletelyDownloaded: ${isDownloaded} for ${dest}` });
-
-
     // fs.writeFileSync(`${dest}.json`, JSON.stringify(info, null, 2), 'utf8');
-    // console.log(`-----`, remoteFileSize,  localSize, isDownloaded);
+    // console.log(`locale/remote comparison:`, localSize , remoteFileSize,  isDownloaded);
     if (remoteFileSize === localSize || isDownloaded) {
-        ms.succeed(dest, { text: `${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}` });
+        //ms.succeed(dest, { text: `${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}` });
         // console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`);
-        //ms.remove(dest);
+        ms.remove(dest);
         // console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
         // downloadBars.create(100, 100, { eta: 0, filename: dest })
         return;
