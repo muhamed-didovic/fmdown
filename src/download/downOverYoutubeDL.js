@@ -111,23 +111,21 @@ module.exports = async (url, dest, { downFolder, index, ms } = {}) => {
         remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
     } catch (err) {
         if (err.message === 'Received invalid status code: 404'){
-            console.log('1ERROR WITH THE URL:', url, err.message);
+            ms.fail(dest, { text: `${index}. ERROR WITH THE URL ${url}, Error message: ${err.message}` });
             return Promise.resolve();
         }
     }
     let localSize = getFilesizeInBytes(`${dest}`)
     let localSizeInBytes = formatBytes(getFilesizeInBytes(`${dest}`))
-
     isDownloaded = isCompletelyDownloaded(downFolder, dest)
-    // console.log(`Checking ${localSizeInBytes}/${formatBytes(remoteFileSize)} isCompletelyDownloaded: ${isDownloaded} for ${dest}`);
     // console.log(`Checking ${localSizeInBytes}/${formatBytes(remoteFileSize)} isCompletelyDownloaded: ${isDownloaded} for ${dest}`);
     ms.update(dest, { text: `Checking size over file: ${formatBytes(remoteFileSize)} isCompletelyDownloaded: ${isDownloaded} for ${dest}` });
     // fs.writeFileSync(`${dest}.json`, JSON.stringify(info, null, 2), 'utf8');
     // console.log(`locale/remote comparison:`, localSize , remoteFileSize,  isDownloaded);
     if (remoteFileSize === localSize || isDownloaded) {
-        //ms.succeed(dest, { text: `${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}` });
+        ms.succeed(dest, { text: `${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}` });
         // console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`);
-        ms.remove(dest);
+        // ms.remove(dest);
         // console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
         // downloadBars.create(100, 100, { eta: 0, filename: dest })
         return;
