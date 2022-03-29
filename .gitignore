@@ -3,5 +3,5 @@ node_modules
 *.mp4
 *.txt
 .DS_Store
-.editorconfig
+#.editorconfig
 videos
