@@ -152,7 +152,7 @@ const getVideosFromFile = async ({
         })
         .then(async (data) => {
             json.courses[index].done = true;
-            fs.writeFileSync(fileName, JSON.stringify(json.courses, null, 2), 'utf8');
+            await fs.writeFile(fileName, JSON.stringify(json.courses, null, 2), 'utf8');
             return data;
         })
 };
