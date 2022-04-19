@@ -100,7 +100,7 @@ const downloadVideo = async (url, dest, {
 module.exports = async ({ url, dest, downFolder, index, multibar } = {}) => {
     url = encodeURI(url)
     //const dest = path.join(downloadFolder, course.title)
-    const m = multibar.create(100, 0);
+    // const m = multibar.create(100, 0);
     // console.log(`Checking if video is downloaded: ${dest.split('/').pop()}`);
     let isDownloaded = false;
     let remoteFileSize = 0;
@@ -117,7 +117,7 @@ module.exports = async ({ url, dest, downFolder, index, multibar } = {}) => {
     isDownloaded = isCompletelyDownloaded(downFolder, dest)
     // console.log('remoteFileSize', remoteFileSize);
     if (remoteFileSize === localSize || isDownloaded) {
-        m.update(100, {
+        /*m.update(100, {
             filename: dest.split('/').pop(),
             l: localSizeInBytes,
             r: formatBytes(remoteFileSize),
@@ -125,8 +125,11 @@ module.exports = async ({ url, dest, downFolder, index, multibar } = {}) => {
             total: 100,
             speed: 0
         })
+        */
+        console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
         return new Promise.resolve().delay(100)
     } else {
+        const m = multibar.create(100, 0);
         return await downloadVideo(url, dest, {
             localSizeInBytes,
             remoteSizeInBytes: formatBytes(remoteFileSize),
