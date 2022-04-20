@@ -7,9 +7,9 @@ const fs = require("fs-extra")
 const prompts = require("prompts")
 const isValidPath = require("is-valid-path")
 const meow = require("meow")
+const json2md = require("json2md");
 
 const getVideos = require("src/download/getVideos.js")
-
 const downloadSubtitle = require("./src/download/downloadSubtitle")
 const downOverYoutubeDL = require("src/download/downOverYoutubeDL")
 const getToken = require("src/download/getToken")
@@ -76,79 +76,102 @@ const getVideosFromFile = async ({
         })*/
         .then(async ({ episodes, data }) => {
 
+            await Promise.all([
+                (async () => {
+                    if (subtitle) {
+                        let cnt = 0
+                        await Promise.map(episodes, async (video, index) => {
+                            await downloadSubtitle({
+                                video,
+                                downloadFolder: path.join(downloadFolder, `${course.title}.srt`),
+                                multibar
+                            })
+                            cnt++
+                        }, {
+                            concurrency// : 1
+                        })
+                    } else {
+                        return Promise.resolve()
+                    }
+                })(),
+                (async () => {
+                    if (videos) {
+                        await Promise
+                            .map(episodes, async (course, index) => {
+                                const dest = path.join(downloadFolder, (`${course.title}.mp4`).replace('/', '\u2215'))
+                                await downOverYoutubeDL({
+                                    url       : course.url,
+                                    dest,
+                                    downFolder: downloadFolder,
+                                    index,
+                                    multibar
+                                })
+
+                            }, {
+                                concurrency// : 1
+                            })
+                        //.then(() => data)
+
+                    } else {
+                        return Promise.resolve()
+                    }
+                })(),
+                (async () => {
+                    if (data.urlMaterials.length > 0) {
+                        return await Promise
+                            .map(data.urlMaterials, async (url, index) => {
+                                let materialsName = url.split('/');
+                                materialsName = (materialsName.includes('materials') ? 'code-' : '') + materialsName[materialsName.length - 1];
+
+                                // let file = path.join(dest, materialsName).replace('/', '\u2215')
+                                if ((!code && materialsName.includes('code'))
+                                    || (!zip && !materialsName.includes('code'))) {
+                                    console.log('skipping materials');
+                                    return Promise.resolve();
+                                }
+                                const dest = path.join(downloadFolder, materialsName)
+                                return await downOverYoutubeDL({
+                                    url,
+                                    dest,
+                                    downFolder: downloadFolder,
+                                    index,
+                                    multibar
+                                })
+                            }, {
+                                concurrency//: 10
+                            })
+                            .then(() => {
+                                return data
+                            })
+                    } else {
+                        return Promise.resolve()
+                    }
+                })(),
+                (async () => {
+                    if (data.notes.length > 0) {
+                        const md = json2md([
+                            { h1: "Resources " },
+                            {
+                                link: [
+                                    ...(data.notes &&
+                                        [data.notes.map(c => ({
+                                            'title' : c.link,
+                                            'source': c.link
+                                        }))]
+                                    )
+                                ]
+                            }
+                        ])
+                        await fs.writeFile(path.join(downloadFolder, `${data.url.split('/').pop()}.md`), md, 'utf8')//-${Date.now()}
+                    } else {
+                        return Promise.resolve()
+                    }
+                })(),
+            ])
+
             //download subtitles
-            if (subtitle) {
-                let cnt = 0
-                await Promise.map(episodes, async (video, index) => {
-                    await downloadSubtitle({
-                        video,
-                        downloadFolder: path.join(downloadFolder, `${course.title}.srt`),
-                        multibar
-                    })
-                    cnt++
-                }, {
-                    concurrency// : 1
-                })
-            }
-            return { episodes, data }
-        })
-        .then(async ({ episodes, data }) => {
-            if (videos) {
-                await Promise
-                    .map(episodes, async (course, index) => {
-                        const dest = path.join(downloadFolder, (`${course.title}.mp4`).replace('/', '\u2215'))
-                        await downOverYoutubeDL({
-                            url       : course.url,
-                            dest,
-                            downFolder: downloadFolder,
-                            index,
-                            multibar
-                        })
-
-                    }, {
-                        concurrency// : 1
-                    })
-                    //.then(() => data)
-
-            }
             return data;
-
-        })
-        /*.then(async ({ episodes, data }) => {
-            return data;
-        })*/
-        .then(async data => {
-            // console.log('--4444');
-            // console.log('data.urlMaterials.length', data.urlMaterials.length);
-            if (data.urlMaterials.length > 0) {
-                return await Promise
-                    .map(data.urlMaterials, async (url, index) => {
-                        let materialsName = url.split('/');
-                        materialsName = (materialsName.includes('materials') ? 'code-' : '') + materialsName[materialsName.length - 1];
-
-                        // let file = path.join(dest, materialsName).replace('/', '\u2215')
-                        if ((!code && materialsName.includes('code'))
-                            || (!zip && !materialsName.includes('code'))) {
-                            console.log('skipping materials');
-                            return Promise.resolve();
-                        }
-                        const dest = path.join(downloadFolder, materialsName)
-                        return await downOverYoutubeDL({
-                            url,
-                            dest,
-                            downFolder: downloadFolder,
-                            index,
-                            multibar
-                        })
-                    }, {
-                        concurrency//: 10
-                    })
-                    .then(() => {
-                        return data
-                    })
-            } else {
-                return data;
-            }
+            //return { episodes, data }
         })
         .then(async (data) => {
             json.courses[index].done = true;
