@@ -126,7 +126,7 @@ module.exports = async ({ url, dest, downFolder, index, multibar } = {}) => {
             speed: 0
         })
         */
-        console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
+        console.log(`${index}. Resource already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
         return new Promise.resolve().delay(100)
     } else {
         const m = multibar.create(100, 0);
