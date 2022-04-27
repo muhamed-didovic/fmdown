@@ -79,17 +79,12 @@ const getVideosFromFile = async ({
             await Promise.all([
                 (async () => {
                     if (subtitle) {
-                        let cnt = 0
-                        await Promise.map(episodes, async (video, index) => {
-                            await downloadSubtitle({
-                                video,
-                                downloadFolder: path.join(downloadFolder, `${course.title}.srt`),
-                                multibar
+                        await Promise
+                            .map(episodes, async (video) => {
+                                await downloadSubtitle({ video, downloadFolder: path.join(downloadFolder, `${course.title}.srt`) })
+                            }, {
+                                concurrency// : 1
                             })
-                            cnt++
-                        }, {
-                            concurrency// : 1
-                        })
                     } else {
                         return Promise.resolve()
                     }
@@ -106,7 +101,6 @@ const getVideosFromFile = async ({
                                     index,
                                     multibar
                                 })
-
                             }, {
                                 concurrency// : 1
                             })
@@ -118,7 +112,7 @@ const getVideosFromFile = async ({
                 })(),
                 (async () => {
                     if (data.urlMaterials.length > 0) {
-                        return await Promise
+                        await Promise
                             .map(data.urlMaterials, async (url, index) => {
                                 let materialsName = url.split('/');
                                 materialsName = (materialsName.includes('materials') ? 'code-' : '') + materialsName[materialsName.length - 1];
@@ -130,7 +124,7 @@ const getVideosFromFile = async ({
                                     return Promise.resolve();
                                 }
                                 const dest = path.join(downloadFolder, materialsName)
-                                return await downOverYoutubeDL({
+                                await downOverYoutubeDL({
                                     url,
                                     dest,
                                     downFolder: downloadFolder,
@@ -143,6 +137,9 @@ const getVideosFromFile = async ({
                             .then(() => {
                                 return data
                             })
+                            /*.then(() => {
+                                return data
+                            })*/
                     } else {
                         return Promise.resolve()
                     }
@@ -213,7 +210,7 @@ const run = async ({ json, fileName, email, password, downDir, code, zip, concur
               concurrency: 10
             })*/
         })
-        .then((data) => {
+        .then(data => {
             console.log("Done!")
             return Promise.resolve(2);
         })
