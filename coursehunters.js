@@ -159,6 +159,7 @@ const getVideosFromFile = async ({
                                 ]
                             }
                         ])
+                        await fs.ensureDir(path.join(downloadFolder))
                         await fs.writeFile(path.join(downloadFolder, `${data.url.split('/').pop()}.md`), md, 'utf8')//-${Date.now()}
                     } else {
                         return Promise.resolve()

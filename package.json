@@ -1,6 +1,6 @@
 {
     "name": "chdown",
-    "version": "0.12.9",
+    "version": "0.12.10",
     "description": "Download courses from https://coursehunter.net/",
     "main": "index.js",
     "scripts": {},
@@ -35,7 +35,7 @@
         "auto-bind": "^4.0.0",
         "axios": "^0.26.1",
         "bluebird": "^3.7.2",
-        "ch-scrape": "^0.15.0",
+        "ch-scrape": "^0.15.1",
         "cheerio": "latest",
         "cli-progress": "^3.10.0",
         "colors": "^1.4.0",
