@@ -32,20 +32,21 @@ const download = (url, dest, {
         .on("progress", (progress) => {
             m.update(progress.percent, {
                 filename: dest.split('/').pop(),
-                l: localSizeInBytes,
-                r: remoteSizeInBytes,
-                eta: progress.eta,
-                total: progress.totalSize,
-                speed: progress.currentSpeed
+                l       : localSizeInBytes,
+                r       : remoteSizeInBytes,
+                eta     : progress.eta,
+                total   : progress.totalSize,
+                speed   : progress.currentSpeed
             })
         })
         // .on("youtubeDlEvent", (eventType, eventData) => console.log(eventType, eventData))
         .on("error", (error) => {
             m.stop()
             console.log('error--', error)
-            fs.unlink(dest, (err) => {
+            /*fs.unlink(dest, (err) => {
                 reject(error);
-            });
+            });*/
+            reject(error);
 
         })
         .on("close", () => {
@@ -73,7 +74,8 @@ const downloadVideo = async (url, dest, {
                     downFolder,
                     index,
                     m
-                }),
+                }
+            ),
             {
                 retries        : 3,
                 onFailedAttempt: error => {

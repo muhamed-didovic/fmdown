@@ -24,12 +24,12 @@ function formatBytes(bytes, decimals) {
 }
 
 function secondsToHms(sec) {
-    var h = Math.floor(sec / 3600);
-    var m = Math.floor(sec % 3600 / 60);
-    var s = Math.floor(sec % 3600 % 60);
-    var hh = h < 10 ? '0' + h : h;
-    var mm = m < 10 ? '0' + m : m;
-    var ss = s < 10 ? '0' + s : s;
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor(sec % 3600 / 60);
+    const s = Math.floor(sec % 3600 % 60);
+    const hh = h < 10 ? '0' + h : h;
+    const mm = m < 10 ? '0' + m : m;
+    const ss = s < 10 ? '0' + s : s;
     return `${hh}:${mm}:${ss}`;
 }
 

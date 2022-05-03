@@ -2,11 +2,11 @@
 
 const cheerio = require("cheerio");
 let request = require("request");
-const he = require("he");
+// const he = require("he");
+
 request = request.defaults({
     jar: true,
 });
-
 
 const getCourseId = ($) => {
     return $('form input[name="course_id"]').attr("value")

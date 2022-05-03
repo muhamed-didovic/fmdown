@@ -2,7 +2,7 @@
 require('app-module-path').addPath(__dirname)
 const Promise = require('bluebird')
 const path = require("path")
-const he = require("he")
+// const he = require("he")
 const fs = require("fs-extra")
 const prompts = require("prompts")
 const isValidPath = require("is-valid-path")
@@ -19,9 +19,6 @@ const getToken = require("src/download/getToken")
 
 // const Spinnies = require('dreidels')
 // const ms = new Spinnies()
-
-// const downloadVideos = require("src/download/downloadVideos")
-// const createFolder = require("src/create/createFolder")
 
 const cliProgress = require('cli-progress')
 // create new container
@@ -211,7 +208,7 @@ const run = async ({ json, fileName, email, password, downDir, code, zip, concur
               concurrency: 10
             })*/
         })
-        .then(data => {
+        .then(() => {
             console.log("Done!")
             return Promise.resolve(2);
         })
