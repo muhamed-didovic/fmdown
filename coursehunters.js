@@ -75,15 +75,16 @@ const getVideosFromFile = async ({
 
             await Promise.all([
                 (async () => {
-                    if (subtitle) {
+                    //download subtitles
+                    if (subtitle && data.subtitles.length > 0) {
+                        console.log('Found subtitles for the course');
                         await Promise
-                            .map(episodes, async (video) => {
-                                await downloadSubtitle({ video, downloadFolder: path.join(downloadFolder, `${course.title}.srt`) })
+                            .map(data.subtitles, async (subtitle, index) => {
+                                const title = data.names[index]
+                                return await downloadSubtitle({ subtitle, dest: path.join(downloadFolder, `${title}.srt`) })
                             }, {
                                 concurrency// : 1
                             })
-                    } else {
-                        return Promise.resolve()
                     }
                 })(),
                 (async () => {
@@ -103,8 +104,6 @@ const getVideosFromFile = async ({
                             })
                         //.then(() => data)
 
-                    } else {
-                        return Promise.resolve()
                     }
                 })(),
                 (async () => {
