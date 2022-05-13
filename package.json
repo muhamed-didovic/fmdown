@@ -1,6 +1,6 @@
 {
     "name": "chdown",
-    "version": "0.13.0",
+    "version": "0.13.1",
     "description": "Download courses from https://coursehunter.net/",
     "main": "index.js",
     "scripts": {},
