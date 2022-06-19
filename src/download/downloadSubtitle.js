@@ -1,4 +1,3 @@
-// const youtubedl = require("youtube-dl-wrap")
 const YoutubeDlWrap = require("youtube-dl-wrap")
 const Promise = require("bluebird");
 const path = require("path");
@@ -6,11 +5,9 @@ const path = require("path");
 const download = async ({ url, dest }) => {
     try  {
         const youtubeDlWrap = new YoutubeDlWrap()
-        let stdout = await youtubeDlWrap.execPromise([url, "-o", path.toNamespacedPath(dest)]);
-        // console.log('stdout',stdout);
-        return stdout;
+        return await youtubeDlWrap.execPromise([url, "-o", path.toNamespacedPath(dest)]);
     } catch (e) {
-        // console.log('Error downloading subtitle', e);
+        console.log('Error downloading subtitle', e);
     }
 };
 
