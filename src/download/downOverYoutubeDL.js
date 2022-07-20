@@ -3,7 +3,6 @@ const fileSize = require('promisify-remote-file-size')
 const { formatBytes } = require('./writeWaitingInfo');
 const { createLogger, isCompletelyDownloaded } = require('./fileChecker');
 const path = require('path')
-// const ytdl = require('ytdl-run')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
 const youtubedl = require("youtube-dl-wrap")
@@ -16,6 +15,34 @@ const getFilesizeInBytes = filename => {
     return fs.existsSync(filename) ? fs.statSync(filename)["size"] : 0;
 };
 
+/**
+ * Retries the given function until it succeeds given a number of retries and an interval between them. They are set
+ * by default to retry 5 times with 1sec in between. There's also a flag to make the cooldown time exponential
+ * @author Daniel Iñigo <danielinigobanos@gmail.com>
+ * @param {Function} fn - Returns a promise
+ * @param {Number} retriesLeft - Number of retries. If -1 will keep retrying
+ * @param {Number} interval - Millis between retries. If exponential set to true will be doubled each retry
+ * @param {Boolean} exponential - Flag for exponential back-off mode
+ * @return {Promise<*>}
+ */
+async function retry(fn, retriesLeft = 5, interval = 1000, exponential = false) {
+    try {
+        const val = await fn();
+        return val;
+    } catch (error) {
+        if (retriesLeft) {
+            console.log('.... p-cluster retrying left (' + retriesLeft + ')');
+            console.log('retrying err', error);
+            await new Promise(r => setTimeout(r, interval));
+            return retry(fn, retriesLeft - 1, exponential ? interval*2 : interval, exponential);
+        } else {
+            console.log('Max retries reached');
+            throw error
+            //throw new Error('Max retries reached');
+        }
+    }
+}
+
 const download = (url, dest, {
     localSizeInBytes,
     remoteSizeInBytes,
@@ -26,36 +53,38 @@ const download = (url, dest, {
     const videoLogger = createLogger(downFolder);
     await fs.remove(dest) // not supports overwrite..
     // console.log(`to be processed by youtube-dl... ${dest.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}`)
-    const youtubeDlWrap = new youtubedl()
-    let youtubeDlEventEmitter = youtubeDlWrap
-        .exec([url, "-o", path.toNamespacedPath(dest)])
-        .on("progress", (progress) => {
-            m.update(progress.percent, {
-                filename: dest.split('/').pop(),
-                l       : localSizeInBytes,
-                r       : remoteSizeInBytes,
-                eta     : progress.eta,
-                total   : progress.totalSize,
-                speed   : progress.currentSpeed
+
+    return await retry(async () => {//return
+        const youtubeDlWrap = new youtubedl()
+        let youtubeDlEventEmitter = youtubeDlWrap
+            .exec([url, "--socket-timeout", "15", "-o", dest])//"-R", "infinte", //path.toNamespacedPath(dest)
+            .on("progress", (progress) => {
+                m.update(progress.percent, {
+                    filename: dest.split('/').pop(),
+                    l       : localSizeInBytes,
+                    r       : remoteSizeInBytes,
+                    eta     : progress.eta,
+                    total   : progress.totalSize,
+                    speed   : progress.currentSpeed
+                })
             })
-        })
-        // .on("youtubeDlEvent", (eventType, eventData) => console.log(eventType, eventData))
-        .on("error", (error) => {
-            m.stop()
-            console.log('error--', error)
-            /*fs.unlink(dest, (err) => {
+            // .on("youtubeDlEvent", (eventType, eventData) => console.log(eventType, eventData))
+            .on("error", (error) => {
+                m.stop()
+                console.log('error--', error)
+                /*fs.unlink(dest, (err) => {
+                    reject(error);
+                });*/
                 reject(error);
-            });*/
-            reject(error);
 
-        })
-        .on("close", () => {
-            m.stop()
-            // console.log(`${index}. End download ytdl: ${dest} compare L/R:${localSizeInBytes}/${remoteSizeInBytes} - Local in bytes:${formatBytes(getFilesizeInBytes(dest))}`.blue);
-            videoLogger.write(`${dest} Size:${getFilesizeInBytes(dest)}\n`);
-            resolve()
-        })
-
+            })
+            .on("close", () => {
+                m.stop()
+                // console.log(`${index}. End download ytdl: ${dest} compare L/R:${localSizeInBytes}/${remoteSizeInBytes} - Local in bytes:${formatBytes(getFilesizeInBytes(dest))}`.blue);
+                videoLogger.write(`${dest} Size:${getFilesizeInBytes(dest)}\n`);
+                resolve()
+            })
+    }, 6, 2e3, true)
 });
 
 const downloadVideo = async (url, dest, {
@@ -132,7 +161,7 @@ module.exports = async ({ url, dest, downFolder, index, multibar } = {}) => {
         return new Promise.resolve().delay(100)
     } else {
         const m = multibar.create(100, 0);
-        return await downloadVideo(url, dest, {
+        return await download(url, dest, {
             localSizeInBytes,
             remoteSizeInBytes: formatBytes(remoteFileSize),
             downFolder,
