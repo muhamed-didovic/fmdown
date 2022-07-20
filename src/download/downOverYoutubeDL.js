@@ -8,7 +8,7 @@ const Promise = require('bluebird')
 const youtubedl = require("youtube-dl-wrap")
 const colors = require('colors');
 
-const pRetry = require('@byungi/p-retry').pRetry
+// const pRetry = require('@byungi/p-retry').pRetry
 // const pDelay = require('@byungi/p-delay').pDelay
 
 const getFilesizeInBytes = filename => {
