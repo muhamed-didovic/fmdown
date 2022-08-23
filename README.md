@@ -43,7 +43,7 @@ Examples:
     $ chdown -a
     $ chdown https://coursehunter.net/course/intermediate-typescript/ -t course
     $ chdown [url] [-e user@gmail.com] [-p password] [-d dirname] [-c number] [-t source]
-    $ chdown --all [-e user@mail.com] [-p password] [-t source-or-course] [-d path-to-directory] [-cc concurrency-number]
+    $ chdown [url] [--all] [-e user@mail.com] [-p password] [-t source|course] [-v yes|no] [-s yes|no] [-z yes|no] [-c yes|no] [-l English|Русский|all] [-d path-to-directory] [-cc concurrency-number]
 ```
 
 

@@ -240,7 +240,7 @@ const cli = meow(`
   Examples
     $ chdown
     $ chdown https://coursehunter.net/source/laraveldaily-com -t source [-e user@gmail.com] [-p password]
-    $ chdown [--all] [-e user@mail.com] [-p password] [-t source|course] [-v yes|no] [-s yes|no] [-z yes|no] [-c yes|no] [-l English|Русский|all] [-d path-to-directory] [-cc concurrency-number]`, {
+    $ chdown [url] [--all] [-e user@mail.com] [-p password] [-t source|course] [-v yes|no] [-s yes|no] [-z yes|no] [-c yes|no] [-l English|Русский|all] [-d path-to-directory] [-cc concurrency-number]`, {
     flags: {
         help       : { alias: 'h' },
         version    : { alias: 'v' },
