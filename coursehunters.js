@@ -17,10 +17,8 @@ const getToken = require("src/download/getToken")
 // const downloadAllMaterials = require("src/download/downloadMaterials")
 // const { formatBytes } = require("./src/download/writeWaitingInfo");
 
-// const Spinnies = require('dreidels')
-// const ms = new Spinnies()
-
 const cliProgress = require('cli-progress')
+
 // create new container
 const multibar = new cliProgress.MultiBar({
     clearOnComplete: false,
@@ -35,7 +33,7 @@ const getLastSegment = url => {
 };
 
 const getVideosFromFile = async ({
-    json,
+    courses,
     course,
     index,
     token,
@@ -76,10 +74,10 @@ const getVideosFromFile = async ({
             await Promise.all([
                 (async () => {
                     //download subtitles
-                    if (subtitle && data.subtitles.length > 0) {
+                    if (subtitle && data?.subtitles.length > 0) {
                         console.log('Found subtitles for the course');
                         await Promise
-                            .map(data.subtitles, async (subtitle, index) => {
+                            .map(data?.subtitles, async (subtitle, index) => {
                                 const title = data.names[index]
                                 return await downloadSubtitle({ subtitle, dest: path.join(downloadFolder, `${title}.srt`) })
                             }, {
@@ -168,14 +166,14 @@ const getVideosFromFile = async ({
             //return { episodes, data }
         })
         .then(async (data) => {
-            json.courses[index].done = true;
-            await fs.writeFile(fileName, JSON.stringify(json.courses, null, 2), 'utf8');
+            courses[index].done = true;
+            await fs.writeFile(fileName, JSON.stringify(courses, null, 2), 'utf8');
             return data;
         })
 };
 
 //const logger = ora()
-const run = async ({ json, fileName, email, password, downDir, code, zip, concurrency, subtitle, videos }) => {
+const run = async ({ courses, fileName, email, password, downDir, code, zip, concurrency, subtitle, videos }) => {
     Promise
         .resolve()
         .then(async () => {
@@ -183,8 +181,8 @@ const run = async ({ json, fileName, email, password, downDir, code, zip, concur
         })
         .then(async token => {
             return await Promise
-                .map(json.courses, async (course, index) => await getVideosFromFile({
-                    json,
+                .map(courses, async (course, index) => await getVideosFromFile({
+                    courses,
                     course,
                     index,
                     token,
@@ -224,31 +222,39 @@ const run = async ({ json, fileName, email, password, downDir, code, zip, concur
 
 const cli = meow(`
   Usage
-    $ chdown <?courseUrl>
+    $ chdown <?CourseUrl|SourceUrl|CategoryUrl>
 
   Options
-    --email, -e
-    --password, -p
-    --directory, -d
-    --type, -t  source|course
-    --code, -c
-    --zip, -z
-    --concurrency, -c
-    --subtitle, -s    Download subtitles if available.
+    --all, -a         Get all courses.
+    --email, -e       Your email.
+    --password, -p    Your password.
+    --directory, -d   Directory to save.
+    --type, -t        source|course Type of download.
+    --videos, -v      Include videos if available (options available: 'yes' or 'no', default is 'yes').
+    --subtitle, -s    Include subtitles if available (options available: 'yes' or 'no', default is 'no').
+    --zip, -z         Include archive if available (options available: 'yes' or 'no', default is 'no').
+    --code, -c        Include code if availabl (options available: 'yes' or 'no', default is 'no').
+    --lang, -l        Include courses of certain language, available options: 'English', 'Русский' and 'all'
+    --concurrency, -cc
 
   Examples
     $ chdown
-    $ chdown https://coursehunter.net/source/laraveldaily-com [-e user@gmail.com] [-p password]
-    $ chdown --all [-e user@mail.com] [-p password] [-t source-or-course] [-d path-to-directory] [-cc concurrency-number]`, {
+    $ chdown https://coursehunter.net/source/laraveldaily-com -t source [-e user@gmail.com] [-p password]
+    $ chdown [--all] [-e user@mail.com] [-p password] [-t source|course] [-v yes|no] [-s yes|no] [-z yes|no] [-c yes|no] [-l English|Русский|all] [-d path-to-directory] [-cc concurrency-number]`, {
     flags: {
+        help       : { alias: 'h' },
+        version    : { alias: 'v' },
+        all        : { type: 'boolean', alias: 'a' },
         email      : { type: 'string', alias: 'e' },
         password   : { type: 'string', alias: 'p' },
         directory  : { type: 'string', alias: 'd' },
         type       : { type: 'string', alias: 't' },
-        code       : { type: 'boolean', alias: 'c', default: true },
-        zip        : { type: 'boolean', alias: 'z', default: false },
-        concurrency: { type: 'number', alias: 'c', default: 10 },
-        subtitle   : { type: 'boolean', alias: 's', default: false },
+        videos     : { type: 'string', alias: 'v', default: 'yes' },
+        subtitle   : { type: 'string', alias: 's', default: 'no' },
+        code       : { type: 'string', alias: 'c', default: 'no' },
+        zip        : { type: 'string', alias: 'z', default: 'no' },
+        lang       : { type: 'string', alias: 'l', default: 'English' },
+        concurrency: { type: 'number', alias: 'cc', default: 10 },
     }
 })
 
@@ -278,16 +284,13 @@ const folderContents = async (folder) => {
     return options;
 }
 
-async function prompt({
-    url = '',
-    email = '',
-    password = '',
-    downDir = '',
-    type = '',
-    code = '',
-    zip = '',
-    subtitle = ''
-}) {
+async function prompt() {
+    const { flags, input } = cli
+
+    const { chScrapePrompt, chScrapeRun} = require('./src/download/helpers');
+    let inputs = await chScrapePrompt(flags);
+
+    //get local file if user want
     const fileChoices = await folderContents(path.resolve(process.cwd(), 'json'))
     const file = await askOrExit({
         type   : 'confirm',
@@ -302,7 +305,17 @@ async function prompt({
         validate: isValidPath
     })
 
+    if (!filePath) {
+        //scrape course with ch-scrape from site
+        let json = await chScrapeRun(inputs)
+        return {
+            ...inputs,
+            ...json
+        }
+    }
+
     return {
+        ...inputs,
         ...(filePath && { courses: require(filePath) }),
         ...(filePath && { fileName: path.resolve(filePath) })
     };
