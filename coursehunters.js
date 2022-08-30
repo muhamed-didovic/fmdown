@@ -79,7 +79,10 @@ const getVideosFromFile = async ({
                         await Promise
                             .map(data?.subtitles, async (subtitle, index) => {
                                 const title = data.names[index]
-                                return await downloadSubtitle({ subtitle, dest: path.join(downloadFolder, `${title}.srt`) })
+                                return await downloadSubtitle({
+                                    subtitle,
+                                    dest: path.join(downloadFolder, `${title}.srt`)
+                                })
                             }, {
                                 concurrency// : 1
                             })
@@ -131,9 +134,9 @@ const getVideosFromFile = async ({
                             .then(() => {
                                 return data
                             })
-                            /*.then(() => {
-                                return data
-                            })*/
+                        /*.then(() => {
+                            return data
+                        })*/
                     } else {
                         return Promise.resolve()
                     }
@@ -240,23 +243,24 @@ const cli = meow(`
   Examples
     $ chdown
     $ chdown https://coursehunter.net/source/laraveldaily-com -t source [-e user@gmail.com] [-p password]
-    $ chdown [url] [--all] [-e user@mail.com] [-p password] [-t source|course] [-v yes|no] [-s yes|no] [-z yes|no] [-c yes|no] [-l English|Русский|all] [-d path-to-directory] [-cc concurrency-number]`, {
-    flags: {
-        help       : { alias: 'h' },
-        version    : { alias: 'v' },
-        all        : { type: 'boolean', alias: 'a' },
-        email      : { type: 'string', alias: 'e' },
-        password   : { type: 'string', alias: 'p' },
-        directory  : { type: 'string', alias: 'd' },
-        type       : { type: 'string', alias: 't' },
-        videos     : { type: 'string', alias: 'v', default: 'yes' },
-        subtitle   : { type: 'string', alias: 's', default: 'no' },
-        code       : { type: 'string', alias: 'c', default: 'no' },
-        zip        : { type: 'string', alias: 'z', default: 'no' },
-        lang       : { type: 'string', alias: 'l', default: 'English' },
-        concurrency: { type: 'number', alias: 'cc', default: 10 },
-    }
-})
+    $ chdown [url] [--all] [-e user@mail.com] [-p password] [-t source|course] [-v yes|no] [-s yes|no] [-z yes|no] [-c yes|no] [-l English|Русский|all] [-d path-to-directory] [-cc concurrency-number]`,
+    {
+        flags: {
+            help       : { alias: 'h' },
+            version    : { alias: 'v' },
+            all        : { type: 'boolean', alias: 'a' },
+            email      : { type: 'string', alias: 'e' },
+            password   : { type: 'string', alias: 'p' },
+            directory  : { type: 'string', alias: 'd' },
+            type       : { type: 'string', alias: 't' },
+            videos     : { type: 'string', alias: 'v', default: 'yes' },
+            subtitle   : { type: 'string', alias: 's', default: 'no' },
+            code       : { type: 'string', alias: 'c', default: 'no' },
+            zip        : { type: 'string', alias: 'z', default: 'no' },
+            lang       : { type: 'string', alias: 'l', default: 'English' },
+            concurrency: { type: 'number', alias: 'cc', default: 10 },
+        }
+    })
 
 /**
  * @param {Omit<import('prompts').PromptObject, 'name'>} question
@@ -287,7 +291,7 @@ const folderContents = async (folder) => {
 async function prompt() {
     const { flags, input } = cli
 
-    const { chScrapePrompt, chScrapeRun} = require('./src/download/helpers');
+    const { chScrapePrompt, chScrapeRun } = require('./src/download/helpers');
     let inputs = await chScrapePrompt(flags);
 
     //get local file if user want

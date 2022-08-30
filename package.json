@@ -1,6 +1,6 @@
 {
     "name": "chdown",
-    "version": "0.15.1",
+    "version": "0.15.2",
     "description": "Download courses from https://coursehunter.net/",
     "main": "index.js",
     "scripts": {},
@@ -18,6 +18,10 @@
         "coursehunter-download",
         "coursehunter-scrape",
         "coursehunter-scraper",
+        "coursehunter.net-downloader",
+        "coursehunter.net-download",
+        "coursehunter.net-scrape",
+        "coursehunter.net-scraper",
         "coursehunter"
     ],
     "author": "Muhamed Didovic (github.com/muhamed-didovic)",
@@ -35,7 +39,7 @@
         "auto-bind": "^4.0.0",
         "axios": "^0.27.2",
         "bluebird": "^3.7.2",
-        "ch-scrape": "^0.17.3",
+        "ch-scrape": "^0.18.0",
         "cheerio": "^1.0.0-rc.12",
         "cli-progress": "^3.11.2",
         "colors": "^1.4.0",

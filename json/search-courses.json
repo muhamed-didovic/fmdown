@@ -1,5 +1,45 @@
 [
   {
+    "second_title": "Создаем Multi-store приложение с Flutter и Firebase",
+    "title": "The Complete Flutter Firebase Multi-store App (Full - Deep)",
+    "value": "https://coursehunter.net/course/polnoe-multimagazinnoe-prilozhenie-flutter-firebase"
+  },
+  {
+    "second_title": "Изучите TypeScript - 2022 Edition",
+    "title": "Mastering TypeScript - 2022 Edition",
+    "value": "https://coursehunter.net/course/izuchite-typescript-2022-edition"
+  },
+  {
+    "second_title": "Фреймворк Laravel",
+    "title": "Фреймворк Laravel",
+    "value": "https://coursehunter.net/course/freymvork-laravel"
+  },
+  {
+    "second_title": "NestJS GraphQL — подход «сначала схема»",
+    "title": "NestJS GraphQL - Schema-first approach",
+    "value": "https://coursehunter.net/course/nestjs-graphql-podhod-snachala-shema"
+  },
+  {
+    "second_title": "NestJS GraphQL — подход «сначала код»",
+    "title": "NestJS GraphQL - Code-first approach",
+    "value": "https://coursehunter.net/course/nestjs-graphql-podhod-snachala-kod"
+  },
+  {
+    "second_title": "CI/CD на примере Gitlab CI - 2022",
+    "title": "CI/CD на примере Gitlab CI",
+    "value": "https://coursehunter.net/course/ci-cd-na-primere-gitlab-ci-2022"
+  },
+  {
+    "second_title": "Terraform База + Мега",
+    "title": "Terraform База + Мега",
+    "value": "https://coursehunter.net/course/terraform-baza-mega"
+  },
+  {
+    "second_title": "PostgreSQL: replication, backup and observability",
+    "title": "PostgreSQL: replication, backup and observability",
+    "value": "https://coursehunter.net/course/postgresql-replication-backup-and-observability"
+  },
+  {
     "second_title": "Продвинутые Темы JavaScript",
     "title": "Advanced JavaScript Topics",
     "value": "https://coursehunter.net/course/rasshirennye-temy-javascript"
@@ -90,7 +130,7 @@
     "value": "https://coursehunter.net/course/sistemy-osnovannye-na-znaniyah"
   },
   {
-    "second_title": "Ansible: Infrastructure as Code",
+    "second_title": "Ansible: Infrastructure as Code - ",
     "title": "Ansible: Infrastructure as Code",
     "value": "https://coursehunter.net/course/ansible-infrastructure-as-code"
   },
@@ -20931,7 +20971,7 @@
   },
   {
     "second_title": "Мастер-класс Java для разработчиков программного обеспечения",
-    "title": "Java Programming Masterclass for Software Developers",
+    "title": "Java Programming Masterclass covering Java 11 & Java 17",
     "value": "https://coursehunter.net/course/udemy-java-masterclass"
   },
   {
