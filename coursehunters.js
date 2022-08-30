@@ -260,7 +260,8 @@ const cli = meow(`
             lang       : { type: 'string', alias: 'l', default: 'English' },
             concurrency: { type: 'number', alias: 'cc', default: 10 },
         }
-    })
+    }
+)
 
 /**
  * @param {Omit<import('prompts').PromptObject, 'name'>} question

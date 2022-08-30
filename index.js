@@ -1,10 +1,7 @@
 #! /usr/bin/env node
 
 'use strict';
-
 // require('app-module-path').addPath(__dirname);
-
-// const scrape = require('ch-scrape');
 const coursehunters = require('./coursehunters');
 
 (async () => {
