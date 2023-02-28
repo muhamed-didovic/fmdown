@@ -36,7 +36,7 @@ const getVideosFromFile = async ({
     courses,
     course,
     index,
-    token,
+    // token,
     downDir,
     fileName,
     code,
@@ -179,16 +179,16 @@ const getVideosFromFile = async ({
 const run = async ({ courses, fileName, email, password, downDir, code, zip, concurrency, subtitle, videos }) => {
     Promise
         .resolve()
-        .then(async () => {
-            return await getToken(email, password);
-        })
-        .then(async token => {
+        // .then(async () => {
+        //     return await getToken(email, password);
+        // })
+        .then(async () => {//token
             return await Promise
                 .map(courses, async (course, index) => await getVideosFromFile({
                     courses,
                     course,
                     index,
-                    token,
+                    // token,
                     downDir,
                     fileName,
                     code,

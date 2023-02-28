@@ -1,5 +1,235 @@
 [
   {
+    "second_title": "React Testing Library и Jest: Полное руководство",
+    "title": "React Testing Library and Jest: The Complete Guide",
+    "value": "https://coursehunter.net/course/biblioteka-testirovaniya-react-i-jest-polnoe-rukovodstvo"
+  },
+  {
+    "second_title": "Создание 3D игр на Unity. Shooter",
+    "title": "Создание 3D игр на Unity. Shooter",
+    "value": "https://coursehunter.net/course/sozdanie-3d-igr-na-unity-shooter"
+  },
+  {
+    "second_title": "Авторизация OAuth2 на примере простого JavaScript приложения",
+    "title": "Авторизация OAuth2 на примере простого JavaScript приложения",
+    "value": "https://coursehunter.net/course/avtorizaciya-oauth2-na-primere-prostogo-javascript-prilozheniya"
+  },
+  {
+    "second_title": "Cypress: сквозное тестирование (end-to-end) - Начало работы",
+    "title": "Cypress End-to-End Testing - Getting Started",
+    "value": "https://coursehunter.net/course/cypress-skvoznoe-testirovanie-end-to-end-nachalo-raboty"
+  },
+  {
+    "second_title": "Сети для DevOps",
+    "title": "Сети для DevOps",
+    "value": "https://coursehunter.net/course/seti-dlya-devops"
+  },
+  {
+    "second_title": "Добрый, добрый Python ООП - обучающий курс от Сергея Балакирева",
+    "title": "Добрый, добрый Python ООП - обучающий курс от Сергея Балакирева",
+    "value": "https://coursehunter.net/course/dobryy-dobryy-python-oop-obuchayushchiy-kurs-ot-sergeya-balakireva"
+  },
+  {
+    "second_title": "Next.js на примере",
+    "title": "Next.js by Example",
+    "value": "https://coursehunter.net/course/next-js-na-primere"
+  },
+  {
+    "second_title": "Облачные бессерверные приложения на Cloudflare Workers Javascript",
+    "title": "Cloud Serverless apps on Cloudflare Workers Javascript",
+    "value": "https://coursehunter.net/course/oblachnye-besservernye-prilozheniya-na-cloudflare-workers-c-javascript"
+  },
+  {
+    "second_title": "Чистая и масштабируемая архитектура CSS",
+    "title": "Clean and Scalable CSS Architecture",
+    "value": "https://coursehunter.net/course/chistaya-i-masshtabiruemaya-arhitektura-css"
+  },
+  {
+    "second_title": "Полный курс Haskell: От нуля до Эксперта!",
+    "title": "The Complete Haskell Course: From Zero to Expert!",
+    "value": "https://coursehunter.net/course/polnyy-kurs-haskell-ot-nulya-do-eksperta"
+  },
+  {
+    "second_title": "Мастер-класс по математике для науки о данных",
+    "title": "Math for Data Science Masterclass",
+    "value": "https://coursehunter.net/course/master-klass-po-matematike-dlya-nauki-o-dannyh"
+  },
+  {
+    "second_title": "Освойте Spring Boot 3 и Spring Framework 6 с Java",
+    "title": "Master Spring Boot 3 & Spring Framework 6 with Java",
+    "value": "https://coursehunter.net/course/osvoyte-spring-boot-3-i-freymvork-spring-6-s-java"
+  },
+  {
+    "second_title": "Мастер-класс по тестированию программного обеспечения | JIRA | AGILE | Тестирование API",
+    "title": "SOFTWARE TESTING MASTERCLASS-2023-JIRA | AGILE | API Testing",
+    "value": "https://coursehunter.net/course/master-klass-po-testirovaniyu-programmnogo-obespecheniya-jira-agile-testirovanie-api"
+  },
+  {
+    "second_title": "Svelte и SvelteKit: Полное руководство",
+    "title": "Svelte & SvelteKit: The Complete Guide",
+    "value": "https://coursehunter.net/course/svelte-i-sveltekit-polnoe-rukovodstvo"
+  },
+  {
+    "second_title": "Математические основы машинного обучения",
+    "title": "Mathematical Foundations of Machine Learning",
+    "value": "https://coursehunter.net/course/matematicheskie-osnovy-mashinnogo-obucheniya"
+  },
+  {
+    "second_title": "Основы бэкенд коммуникаций и протоколов",
+    "title": "Fundamentals of Backend Communications and Protocols",
+    "value": "https://coursehunter.net/course/osnovy-bekend-kommunikaciy-i-protokolov"
+  },
+  {
+    "second_title": "Микросервисы Golang: Переход от монолита к микросервисам",
+    "title": "Golang Microservices: Breaking a Monolith to Microservices",
+    "value": "https://coursehunter.net/course/mikroservisy-golang-perehod-ot-monolita-k-mikroservisam"
+  },
+  {
+    "second_title": "Микросервисы: Чистая архитектура, DDD, SAGA, Outbox и Kafka",
+    "title": "Microservices: Clean Architecture, DDD, SAGA, Outbox & Kafka",
+    "value": "https://coursehunter.net/course/mikroservisy-chistaya-arhitektura-ddd-saga-outbox-i-kafka"
+  },
+  {
+    "second_title": "Node.js -  Мастер-класс по RESTful API",
+    "title": "Node.js - The Complete RESTful API Masterclass",
+    "value": "https://coursehunter.net/course/node-js-master-klass-po-restful-api"
+  },
+  {
+    "second_title": "Вопросы на собеседовании по JavaScript",
+    "title": "JavaScript Interview Questions - Coding Interview 2022",
+    "value": "https://coursehunter.net/course/voprosy-dlya-sobesedovaniya-po-javascript"
+  },
+  {
+    "second_title": "Java Crew #1",
+    "title": "Java Crew #1",
+    "value": "https://coursehunter.net/course/java-crew-1"
+  },
+  {
+    "second_title": "Теория графов",
+    "title": "Graph Theory",
+    "value": "https://coursehunter.net/course/teoriya-grafov"
+  },
+  {
+    "second_title": "Erlang: Полное руководство для начинающих",
+    "title": "Erlang: The Complete Beginner's Guide 2023",
+    "value": "https://coursehunter.net/course/erlang-polnoe-rukovodstvo-dlya-nachinayushchih"
+  },
+  {
+    "second_title": "Мастер-курс по алгоритмам динамического программирования",
+    "title": "Dynamic Programming Algorithms Master Course (2022)",
+    "value": "https://coursehunter.net/course/master-kurs-po-algoritmam-dinamicheskogo-programmirovaniya"
+  },
+  {
+    "second_title": "Введение в Django и Graphene",
+    "title": "Intro to Django and Graphene",
+    "value": "https://coursehunter.net/course/vvedenie-v-django-i-graphene"
+  },
+  {
+    "second_title": "Angular и Golang: Быстрое руководство - Продвинутый уровень",
+    "title": "Angular and Golang: A Rapid Guide - Advanced",
+    "value": "https://coursehunter.net/course/angular-i-golang-bystroe-rukovodstvo-prodvinutyy-uroven"
+  },
+  {
+    "second_title": "Создание фулстек клона Trello: WebSocket, Socket IO",
+    "title": "Build Fullstack Trello clone: WebSocket, Socket IO",
+    "value": "https://coursehunter.net/course/sozdanie-fulstek-klona-trello-websocket-socket-io"
+  },
+  {
+    "second_title": "Unity Bootcamp: разработка 3D-игр",
+    "title": "Unity Bootcamp: 3D Game Development",
+    "value": "https://coursehunter.net/course/unity-bootcamp-razrabotka-3d-igr"
+  },
+  {
+    "second_title": "Современный JavaScript с самого начала 2.0",
+    "title": "Modern JavaScript From The Beginning 2.0",
+    "value": "https://coursehunter.net/course/sovremennyy-javascript-s-samogo-nachala-2-0"
+  },
+  {
+    "second_title": "Возможности Django Admin о которых вы могли не знать",
+    "title": "Возможности Django Admin о которых вы могли не знать",
+    "value": "https://coursehunter.net/course/vozmozhnosti-django-admin-o-kotoryh-vy-mogli-ne-znat"
+  },
+  {
+    "second_title": "Основы решения алгоритмических задач. Уровень 2",
+    "title": "Основы решения алгоритмических задач. Уровень 2",
+    "value": "https://coursehunter.net/course/osnovy-resheniya-algoritmicheskih-zadach-uroven-2"
+  },
+  {
+    "second_title": "Основы решения алгоритмических задач. Уровень 1",
+    "title": "Основы решения алгоритмических задач. Уровень 1",
+    "value": "https://coursehunter.net/course/osnovy-resheniya-algoritmicheskih-zadach-uroven-1"
+  },
+  {
+    "second_title": "Разработка и оркестрация ETL процессов в Airflow",
+    "title": "Разработка и оркестрация ETL процессов в Airflow",
+    "value": "https://coursehunter.net/course/razrabotka-i-orkestraciya-etl-processov-v-airflow"
+  },
+  {
+    "second_title": "Проекты по программированию",
+    "title": "Programming Projects",
+    "value": "https://coursehunter.net/course/proekty-po-programmirovaniyu"
+  },
+  {
+    "second_title": "Программирование с Go",
+    "title": "Programming With Go",
+    "value": "https://coursehunter.net/course/programmirovanie-s-go"
+  },
+  {
+    "second_title": "Инструменты разработки программного обеспечения",
+    "title": "Software Engineering Tools",
+    "value": "https://coursehunter.net/course/instrumenty-razrabotki-programmnogo-obespecheniya"
+  },
+  {
+    "second_title": "Автоматизация API: REST Assured + Java, проект с Google API",
+    "title": "Автоматизация API: REST Assured + Java, проект с Google API",
+    "value": "https://coursehunter.net/course/avtomatizaciya-api-rest-assured-java-proekt-s-google-api"
+  },
+  {
+    "second_title": "Дизайн программного обеспечения",
+    "title": "Software Design",
+    "value": "https://coursehunter.net/course/dizayn-programmnogo-obespecheniya"
+  },
+  {
+    "second_title": "HTTP. Servlets",
+    "title": "HTTP. Servlets",
+    "value": "https://coursehunter.net/course/http-servlety"
+  },
+  {
+    "second_title": "Продвинутое программирование",
+    "title": "Advanced Programming",
+    "value": "https://coursehunter.net/course/prodvinutoe-programmirovanie"
+  },
+  {
+    "second_title": "Объектно-ориентированного программирования",
+    "title": "Object-Oriented Programming",
+    "value": "https://coursehunter.net/course/obektno-orientirovannogo-programmirovaniya"
+  },
+  {
+    "second_title": "Backend Crew #4",
+    "title": "Backend Crew #4",
+    "value": "https://coursehunter.net/course/backend-crew-4"
+  },
+  {
+    "second_title": "Основы программирования (programmingexpert)",
+    "title": "Programming Fundamentals",
+    "value": "https://coursehunter.net/course/osnovy-programmirovaniya-programmingexpert"
+  },
+  {
+    "second_title": "Продвинутый SQL",
+    "title": "Продвинутый SQL",
+    "value": "https://coursehunter.net/course/prodvinutyy-sql"
+  },
+  {
+    "second_title": "Администрирова­ние Linux. Мега",
+    "title": "Администрирова­ние Linux. Мега",
+    "value": "https://coursehunter.net/course/administrirova-nie-linux-mega"
+  },
+  {
+    "second_title": "Безопасность проекта: аутентификация в Keycloak",
+    "title": "Безопасность проекта: аутентификация в Keycloak",
+    "value": "https://coursehunter.net/course/bezopasnost-proekta-autentifikaciya-v-keycloak"
+  },
+  {
     "second_title": "Сертифицированный архитектор решений AWS: от нуля до мастерства",
     "title": "AWS Certified Solutions Architect: Zero to Mastery",
     "value": "https://coursehunter.net/course/sertificirovannyy-arhitektor-resheniy-aws-ot-nulya-do-masterstva"
@@ -326,7 +556,7 @@
   },
   {
     "second_title": "Создание Full-Stack приложений с нуля",
-    "title": "Build Full-Stack Apps from Scratch",
+    "title": "Build a Fullstack App with Next.js, v2",
     "value": "https://coursehunter.net/course/sozdanie-full-stack-prilozheniy-s-nulya"
   },
   {
@@ -885,8 +1115,8 @@
     "value": "https://coursehunter.net/course/kreativnaya-praktika-ot-idei-do-finalnoy-verstki-s-pomoshchyu-figma"
   },
   {
-    "second_title": "Основы Angular (v14)",
-    "title": "Angular Basics (v14)",
+    "second_title": "Основы Angular (v15)",
+    "title": "Angular Basics (v15)",
     "value": "https://coursehunter.net/course/osnovy-angular-v14"
   },
   {
@@ -7590,8 +7820,8 @@
     "value": "https://coursehunter.net/course/polnyy-put-k-masterstvu-javascript"
   },
   {
-    "second_title": "100 Дней Кода - Python Pro Bootcamp 2022",
-    "title": "100 Days of Code - The Complete Python Pro Bootcamp for 2022",
+    "second_title": "100 Дней Кода - Python Pro Bootcamp 2023",
+    "title": "100 Days of Code - The Complete Python Pro Bootcamp for 2023",
     "value": "https://coursehunter.net/course/100-dney-koda-polnyy-uchebnyy-kurs-python-pro"
   },
   {
@@ -18200,8 +18430,8 @@
     "value": "https://coursehunter.net/course/build-user-interfaces-by-composing-css-utility-classes-with-tailwind"
   },
   {
-    "second_title": "Разработчик Ethereum Blockchain 2022",
-    "title": "Ethereum Blockchain Developer Bootcamp With Solidity (2022)",
+    "second_title": "Разработчик Ethereum Blockchain 2023",
+    "title": "Ethereum Blockchain Developer Bootcamp With Solidity (2023)",
     "value": "https://coursehunter.net/course/razrabotchik-ethereum-blockchain-2018-19-bootcamp"
   },
   {
