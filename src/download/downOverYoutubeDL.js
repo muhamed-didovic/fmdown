@@ -10,6 +10,15 @@ const colors = require('colors');
 
 // const pRetry = require('@byungi/p-retry').pRetry
 // const pDelay = require('@byungi/p-delay').pDelay
+// const { MultiProgressBars } = require('multi-progress-bars');
+// const mpb = new MultiProgressBars({
+//     initMessage: ' CourseHunter ',
+//     anchor: "top",
+//     persist: true,
+//     progressWidth: 40,
+//     numCrawlers: 7,
+//     border: true,
+// });
 
 const getFilesizeInBytes = filename => {
     return fs.existsSync(filename) ? fs.statSync(filename)["size"] : 0;
@@ -48,7 +57,8 @@ const download = (url, dest, {
     remoteSizeInBytes,
     downFolder,
     index = 0,
-    m
+    mpb
+    // m
 }) => new Promise(async (resolve, reject) => {
     const videoLogger = createLogger(downFolder);
     await fs.remove(dest) // not supports overwrite..
@@ -59,18 +69,20 @@ const download = (url, dest, {
         let youtubeDlEventEmitter = youtubeDlWrap
             .exec([url, "--socket-timeout", "15", "-o", dest])//"-R", "infinte", //path.toNamespacedPath(dest)
             .on("progress", (progress) => {
-                m.update(progress.percent, {
-                    filename: dest.split('/').pop(),
-                    l       : localSizeInBytes,
-                    r       : remoteSizeInBytes,
-                    eta     : progress.eta,
-                    total   : progress.totalSize,
-                    speed   : progress.currentSpeed
-                })
+                // m.update(progress.percent, {
+                //     filename: dest.split('/').pop(),
+                //     l       : localSizeInBytes,
+                //     r       : remoteSizeInBytes,
+                //     eta     : progress.eta,
+                //     total   : progress.totalSize,
+                //     speed   : progress.currentSpeed
+                // })
+                mpb.updateTask(dest.split('/').pop(), {percentage: progress.percent / 100});
             })
             // .on("youtubeDlEvent", (eventType, eventData) => console.log(eventType, eventData))
             .on("error", (error) => {
-                m.stop()
+                // m.stop()
+                mpb.done(dest.split('/').pop(), { message: `Error happend while downloading ${index} - ${dest}` });
                 console.log('error--', error)
                 /*fs.unlink(dest, (err) => {
                     reject(error);
@@ -79,47 +91,17 @@ const download = (url, dest, {
 
             })
             .on("close", () => {
-                m.stop()
+                mpb.done(dest.split('/').pop(), { message: `${index} - ${dest} - Downloaded successfully.` });
+                setTimeout(() => mpb.removeTask(dest.split('/').pop()), 3000);
+                // mpb.removeTask(dest.split('/').pop())
+                // m.stop()
                 // console.log(`${index}. End download ytdl: ${dest} compare L/R:${localSizeInBytes}/${remoteSizeInBytes} - Local in bytes:${formatBytes(getFilesizeInBytes(dest))}`.blue);
                 videoLogger.write(`${dest} Size:${getFilesizeInBytes(dest)}\n`);
                 resolve()
             })
+
     }, 6, 2e3, true)
 });
-
-const downloadVideo = async (url, dest, {
-    localSizeInBytes,
-    remoteSizeInBytes,
-    downFolder,
-    index = 0,
-    m
-}) => {
-    try {
-        await pRetry(
-            () => download(url, dest,
-                {
-                    localSizeInBytes,
-                    remoteSizeInBytes,
-                    downFolder,
-                    index,
-                    m
-                }
-            ),
-            {
-                retries        : 3,
-                onFailedAttempt: error => {
-                    console.log(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`);
-                    // 1st request => Attempt 1 failed. There are 4 retries left.
-                    // 2nd request => Attempt 2 failed. There are 3 retries left.
-                    // …
-                }
-            })
-    } catch (e) {
-        console.error('Issue with downloading', e);
-        //reject(e)
-    }
-}
-
 
 /**
  * @param url
@@ -128,10 +110,10 @@ const downloadVideo = async (url, dest, {
  * @param index
  * @param ms
  */
-module.exports = async ({ url, dest, downFolder, index, multibar } = {}) => {
+module.exports = async ({ url, dest, downFolder, index, mpb } = {}) => {//, multibar
     url = encodeURI(url)
     //const dest = path.join(downloadFolder, course.title)
-    // const m = multibar.create(100, 0);
+    mpb.addTask(dest.split('/').pop(), {type: "percentage", message: `${index} - ${dest}`});
     // console.log(`Checking if video is downloaded: ${dest.split('/').pop()}`);
     let isDownloaded = false;
     let remoteFileSize = 0;
@@ -157,16 +139,21 @@ module.exports = async ({ url, dest, downFolder, index, multibar } = {}) => {
             speed: 0
         })
         */
-        console.log(`${index}. Resource already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
+        mpb.done(dest.split('/').pop(), { message: `${index} - ${dest} - Resource already downloaded.` });
+        setTimeout(() => mpb.removeTask(dest.split('/').pop()), 3000);
+        // console.log(`${index}. Resource already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
         return new Promise.resolve().delay(100)
     } else {
-        const m = multibar.create(100, 0);
+        //const m = multibar.create(100, 0);
+        // mpb.addTask(chapter.name, { type: "percentage", message: `${chapter.number} - ${course.title}` });
+        // mpb.addTask(dest, {type: "percentage", message: `${index} - ${url}`});
         return await download(url, dest, {
             localSizeInBytes,
             remoteSizeInBytes: formatBytes(remoteFileSize),
             downFolder,
             index,
-            m
+            mpb
+            // m
         });
     }
 }

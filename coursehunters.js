@@ -9,10 +9,10 @@ const isValidPath = require("is-valid-path")
 const meow = require("meow")
 const json2md = require("json2md");
 
-const getVideos = require("src/download/getVideos.js")
+const getVideos = require("./src/download/getVideos.js")
 const downloadSubtitle = require("./src/download/downloadSubtitle")
-const downOverYoutubeDL = require("src/download/downOverYoutubeDL")
-const getToken = require("src/download/getToken")
+const downOverYoutubeDL = require("./src/download/downOverYoutubeDL")
+const getToken = require("./src/download/getToken")
 
 // const downloadAllMaterials = require("src/download/downloadMaterials")
 // const { formatBytes } = require("./src/download/writeWaitingInfo");
@@ -20,12 +20,12 @@ const getToken = require("src/download/getToken")
 const cliProgress = require('cli-progress')
 
 // create new container
-const multibar = new cliProgress.MultiBar({
-    clearOnComplete: false,
-    hideCursor     : true,
-    format         : '[{bar}] {percentage}% | ETA: {eta}s | Speed: {speed} | FileName: {filename} Found:{l}/{r}'
+// const multibar = new cliProgress.MultiBar({
+//     clearOnComplete: false,
+//     hideCursor     : true,
+//     format         : '[{bar}] {percentage}% | ETA: {eta}s | Speed: {speed} | FileName: {filename} Found:{l}/{r}'
 
-}, cliProgress.Presets.shades_grey);
+// }, cliProgress.Presets.shades_grey);
 
 const getLastSegment = url => {
     let parts = url.split('/');
@@ -43,7 +43,8 @@ const getVideosFromFile = async ({
     zip,
     concurrency,
     subtitle,
-    videos
+    videos,
+    mpb
 }) => {
     if (course?.done === true) {
         return;
@@ -98,7 +99,8 @@ const getVideosFromFile = async ({
                                     dest,
                                     downFolder: downloadFolder,
                                     index,
-                                    multibar
+                                    mpb
+                                    // multibar
                                 })
                             }, {
                                 concurrency// : 1
@@ -126,7 +128,8 @@ const getVideosFromFile = async ({
                                     dest,
                                     downFolder: downloadFolder,
                                     index,
-                                    multibar
+                                    mpb
+                                    // multibar
                                 })
                             }, {
                                 concurrency//: 10
@@ -176,7 +179,7 @@ const getVideosFromFile = async ({
 };
 
 //const logger = ora()
-const run = async ({ courses, fileName, email, password, downDir, code, zip, concurrency, subtitle, videos }) => {
+const run = async ({ courses, fileName, email, password, downDir, code, zip, concurrency, subtitle, videos, mpb }) => {
     Promise
         .resolve()
         // .then(async () => {
@@ -195,7 +198,8 @@ const run = async ({ courses, fileName, email, password, downDir, code, zip, con
                     zip,
                     concurrency,
                     subtitle,
-                    videos
+                    videos,
+                    mpb
                 }), {
                     concurrency
                 })
@@ -217,7 +221,9 @@ const run = async ({ courses, fileName, email, password, downDir, code, zip, con
             console.error("Catch::: ", rejection);
         })
         .finally(async () => {
-            multibar.stop()
+            console.log('finally DONE...');
+            await mpb.promise;
+            // multibar.stop()
             // Promise.resolve().then(() =>multibar.stop())
         });
 };
